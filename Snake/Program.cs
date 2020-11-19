@@ -24,6 +24,7 @@ namespace Snake
 
         private static void Tick(object state)
         {
+            Direction? direction = null;
             if(Console.KeyAvailable)
             {
                 var cki = Console.ReadKey(true);
@@ -33,8 +34,19 @@ namespace Snake
                     _manualResetEvent.Set();
                 }
 
+                direction = cki.Key switch
+                {
+                    ConsoleKey.UpArrow => Direction.North,
+                    ConsoleKey.DownArrow => Direction.South,
+                    ConsoleKey.RightArrow => Direction.East,
+                    ConsoleKey.LeftArrow => Direction.West,
+                    _ => null
+                    ,
+                };
+
             }
-            snake.Move();
+
+            snake.Move(direction);
             Draw();
         }
 
