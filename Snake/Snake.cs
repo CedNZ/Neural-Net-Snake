@@ -46,7 +46,6 @@ namespace Snake
                 _ => throw new NotImplementedException()
             };
 
-            if (newHead.X < 0 || newHead.X > _mapWidth || newHead.Y < 0 || newHead.Y > _mapHeight)
             if (newHead.X < 0 || newHead.X > _mapWidth 
                 || newHead.Y < 0 || newHead.Y > _mapHeight
                 || OccupiesSquare(newHead))
@@ -54,6 +53,8 @@ namespace Snake
                 Alive = false;
                 return;
             }
+
+            DistanceToFood = CartesianDistance(newHead, food.Location);
 
             if (newHead == food.Location)
             {
@@ -63,6 +64,11 @@ namespace Snake
 
             _snake.Insert(0, newHead);
             _snake = _snake.Take(Length).ToList();
+        }
+
+        public double CartesianDistance((int X, int Y) p, (int X, int Y) q)
+        {
+            return Math.Sqrt(Math.Pow((p.X - q.X), 2) + Math.Pow((p.Y - q.Y), 2));
         }
 
         public bool OccupiesSquare((int X, int Y) location) 
@@ -90,11 +96,17 @@ namespace Snake
             }
         }
 
-        public int Length { get; private set; }
 
         public (int X, int Y) Head => _snake.First();
 
+        public int Length { get; private set; }
         public bool Alive { get; private set; }
+
+        public int DistanceToNorthWall => Head.Y;
+        public int DistanceToSouthWall => _mapHeight - Head.Y;
+        public int DistanceToWestWall => Head.X;
+        public int DistanceToEastWall => _mapWidth - Head.X;
+        public double DistanceToFood { get; private set; }
     }
 
     public enum Direction

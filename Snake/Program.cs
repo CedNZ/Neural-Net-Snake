@@ -87,7 +87,11 @@ namespace Snake
                 }
                 sb.AppendLine();
             }
-            sb.AppendLine($"\nSnake Position: X: {snake.Head.X}, Y: {snake.Head.Y}, Length: {snake.Length}");
+            sb.AppendLine($"\nSnake Distances to Walls: N:{snake.DistanceToNorthWall} S:{snake.DistanceToSouthWall} W:{snake.DistanceToWestWall} E:{snake.DistanceToEastWall} F:{snake.DistanceToFood:F2} Length: {snake.Length}");
+            if (!snake.Alive)
+            {
+                sb.AppendLine("You Died");
+            }
 
             Console.Clear();
             Console.Write(sb.ToString());
