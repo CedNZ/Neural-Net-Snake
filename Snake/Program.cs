@@ -24,6 +24,16 @@ namespace Snake
 
         private static void Tick(object state)
         {
+            if(Console.KeyAvailable)
+            {
+                var cki = Console.ReadKey(true);
+
+                if(cki.Key == ConsoleKey.Escape)
+                {
+                    _manualResetEvent.Set();
+                }
+
+            }
             snake.Move();
             Draw();
         }
