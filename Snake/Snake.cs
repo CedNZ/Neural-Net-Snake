@@ -47,6 +47,9 @@ namespace Snake
             };
 
             if (newHead.X < 0 || newHead.X > _mapWidth || newHead.Y < 0 || newHead.Y > _mapHeight)
+            if (newHead.X < 0 || newHead.X > _mapWidth 
+                || newHead.Y < 0 || newHead.Y > _mapHeight
+                || OccupiesSquare(newHead))
             {
                 Alive = false;
                 return;
