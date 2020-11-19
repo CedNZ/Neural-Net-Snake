@@ -24,7 +24,7 @@ namespace Snake
             Length = 3;
         }
 
-        public void Move(Direction? direction)
+        public void Move(Direction? direction, Food food)
         {
             SnakeDirection = direction;
             
@@ -40,8 +40,19 @@ namespace Snake
                 _ => throw new NotImplementedException()
             };
 
+            if (newHead == food.Location)
+            {
+                food.Eaten = true;
+                Length++;
+            }
+
             _snake.Insert(0, newHead);
             _snake = _snake.Take(Length).ToList();
+        }
+
+        public bool OccupiesSquare((int X, int Y) location) 
+        {
+            return OccupiesSquare(location.X, location.Y);
         }
 
         public bool OccupiesSquare(int x, int y)
