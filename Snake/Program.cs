@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text;
 using System.Threading;
-//using System.Timers;
 
 namespace Snake
 {
@@ -38,6 +37,10 @@ namespace Snake
                 {
                     _manualResetEvent.Set();
                 }
+                if (cki.Key == ConsoleKey.R)
+                {
+                    snake.Create();
+                }
 
                 direction = cki.Key switch
                 {
@@ -45,8 +48,7 @@ namespace Snake
                     ConsoleKey.DownArrow => Direction.South,
                     ConsoleKey.RightArrow => Direction.East,
                     ConsoleKey.LeftArrow => Direction.West,
-                    _ => null
-                    ,
+                    _ => null,
                 };
 
             }
@@ -60,7 +62,11 @@ namespace Snake
                 while(snake.OccupiesSquare(food.Location));
             }
 
-            snake.Move(direction, food);
+            if (snake.Alive)
+            {
+                snake.Move(direction, food);
+            }
+
             Draw();
         }
 

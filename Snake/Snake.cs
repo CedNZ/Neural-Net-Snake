@@ -16,12 +16,18 @@ namespace Snake
             _mapWidth = mapWidth;
             _mapHeight = mapHeight;
 
+            Create();
+        }
+
+        public void Create()
+        {
             _snake = new List<(int X, int Y)>
             {
-                (mapWidth / 2, mapHeight / 2)
+                (_mapWidth / 2, _mapHeight / 2)
             };
             SnakeDirection = Direction.East;
             Length = 3;
+            Alive = true;
         }
 
         public void Move(Direction? direction, Food food)
@@ -31,7 +37,7 @@ namespace Snake
             var currentHeadX = _snake.First().X;
             var currentHeadY = _snake.First().Y;
 
-            var newHead = SnakeDirection switch
+            (int X, int Y) newHead = SnakeDirection switch
             {
                 Direction.North => (currentHeadX, currentHeadY - 1),
                 Direction.South => (currentHeadX, currentHeadY + 1),
@@ -39,6 +45,12 @@ namespace Snake
                 Direction.West => (currentHeadX - 1, currentHeadY),
                 _ => throw new NotImplementedException()
             };
+
+            if (newHead.X < 0 || newHead.X > _mapWidth || newHead.Y < 0 || newHead.Y > _mapHeight)
+            {
+                Alive = false;
+                return;
+            }
 
             if (newHead == food.Location)
             {
@@ -78,6 +90,8 @@ namespace Snake
         public int Length { get; private set; }
 
         public (int X, int Y) Head => _snake.First();
+
+        public bool Alive { get; private set; }
     }
 
     public enum Direction
