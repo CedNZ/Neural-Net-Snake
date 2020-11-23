@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -13,6 +15,9 @@ namespace Snake
         static Snake snake;
         static Timer timer;
         static Food food;
+        static List<double> nOut;
+
+        static NeuralNet.NeuralNetwork neuralNet;
 
         public static void Main(string[] args)
         {
@@ -20,15 +25,43 @@ namespace Snake
 
             snake = new Snake(MapWidth, MapHeight);
             food = new Food(MapWidth, MapHeight);
+            neuralNet = new NeuralNet.NeuralNetwork(0.5, new[] { 6, 5, 4 });
 
-            timer = new Timer(Tick, _manualResetEvent, 100, 100);
+            timer = new Timer(Tick, _manualResetEvent, 100, 50);
+            //while(true)
+            //{
+            //    Tick(_manualResetEvent);
+            //}
 
             _manualResetEvent.WaitOne();
         }
 
         private static void Tick(object state)
         {
+            List<double> neuralNetInputs = new List<double> { 1.0/snake.DistanceToFood,
+                1.0/snake.DistanceToNorthWall,
+                1.0/snake.DistanceToSouthWall,
+                1.0/snake.DistanceToEastWall,
+                1.0/snake.DistanceToWestWall,
+                1.0/snake.Length };
+
+            var outputs = neuralNet.Run(neuralNetInputs).ToList();
+
+            nOut = outputs;
+
             Direction? direction = null;
+
+            var highest = outputs.IndexOf(outputs.Max());
+
+            direction = highest switch
+            {
+                0 => Direction.North,
+                1 => Direction.South,
+                2 => Direction.East,
+                3 => Direction.West,
+                _ => null,
+            };
+
             if(Console.KeyAvailable)
             {
                 var cki = Console.ReadKey(true);
@@ -37,23 +70,28 @@ namespace Snake
                 {
                     _manualResetEvent.Set();
                 }
-                if (cki.Key == ConsoleKey.R)
+                if(cki.Key == ConsoleKey.R)
                 {
+                    neuralNet = new NeuralNet.NeuralNetwork(0.5, new[] { 6, 5, 4 });
                     snake.Create();
                 }
-
-                direction = cki.Key switch
+                if(cki.Key == ConsoleKey.L)
                 {
-                    ConsoleKey.UpArrow => Direction.North,
-                    ConsoleKey.DownArrow => Direction.South,
-                    ConsoleKey.RightArrow => Direction.East,
-                    ConsoleKey.LeftArrow => Direction.West,
-                    _ => null,
-                };
+                    snake.Lengthen();
+                }
 
+
+                //    direction = cki.Key switch
+                //    {
+                //        ConsoleKey.UpArrow => Direction.North,
+                //        ConsoleKey.DownArrow => Direction.South,
+                //        ConsoleKey.RightArrow => Direction.East,
+                //        ConsoleKey.LeftArrow => Direction.West,
+                //        _ => null,
+                //    };
             }
 
-            if (food.Eaten)
+            if(food.Eaten)
             {
                 do
                 {
@@ -62,7 +100,7 @@ namespace Snake
                 while(snake.OccupiesSquare(food.Location));
             }
 
-            if (snake.Alive)
+            if(snake.Alive)
             {
                 snake.Move(direction, food);
             }
@@ -74,21 +112,22 @@ namespace Snake
         {
             StringBuilder sb = new StringBuilder();
 
-            for (int y = 0; y < MapHeight; y++)
+            for(int y = 0; y < MapHeight; y++)
             {
                 for(int x = 0; x < MapWidth; x++)
                 {
                     sb.Append(
-                        snake.OccupiesSquare(x, y) 
-                            ? "●" 
-                            : food.Location == (x, y) 
+                        snake.OccupiesSquare(x, y)
+                            ? "●"
+                            : food.Location == (x, y)
                                 ? "ᴥ"
                                 : " ");
                 }
                 sb.AppendLine();
             }
             sb.AppendLine($"\nSnake Distances to Walls: N:{snake.DistanceToNorthWall} S:{snake.DistanceToSouthWall} W:{snake.DistanceToWestWall} E:{snake.DistanceToEastWall} F:{snake.DistanceToFood:F2} Length: {snake.Length}");
-            if (!snake.Alive)
+            sb.AppendLine($"NN Outputs: {nOut[0]} {nOut[1]} {nOut[2]} {nOut[3]}");
+            if(!snake.Alive)
             {
                 sb.AppendLine("You Died");
             }

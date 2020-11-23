@@ -30,6 +30,11 @@ namespace Snake
             Alive = true;
         }
 
+        public void Lengthen()
+        {
+            Length++;
+        }
+
         public void Move(Direction? direction, Food food)
         {
             SnakeDirection = direction;
@@ -46,8 +51,8 @@ namespace Snake
                 _ => throw new NotImplementedException()
             };
 
-            if (newHead.X < 0 || newHead.X > _mapWidth 
-                || newHead.Y < 0 || newHead.Y > _mapHeight
+            if (newHead.X < 0 || newHead.X > _mapWidth - 1 
+                || newHead.Y < 0 || newHead.Y > _mapHeight - 1
                 || OccupiesSquare(newHead))
             {
                 Alive = false;
@@ -102,10 +107,10 @@ namespace Snake
         public int Length { get; private set; }
         public bool Alive { get; private set; }
 
-        public int DistanceToNorthWall => Head.Y;
-        public int DistanceToSouthWall => _mapHeight - Head.Y;
-        public int DistanceToWestWall => Head.X;
-        public int DistanceToEastWall => _mapWidth - Head.X;
+        public double DistanceToNorthWall => Head.Y;
+        public double DistanceToSouthWall => _mapHeight - 1 - Head.Y;
+        public double DistanceToWestWall => Head.X;
+        public double DistanceToEastWall => _mapWidth - 1 - Head.X;
         public double DistanceToFood { get; private set; }
     }
 
