@@ -131,6 +131,25 @@ namespace Snake.NeuralNet
             return Layers.Last().Neurons.Select(n => n.Value).ToArray();
         }
 
+        public void Save(string file, int generation)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"{generation},{Fitness},");
+            foreach(var layer in Layers)
+            {
+                foreach(var neuron in layer.Neurons)
+                {
+                    sb.Append(neuron.Bias + ",");
+
+                    foreach(var dendrite in neuron.Dendrites)
+                    {
+                        sb.Append(dendrite.Weight + ",");
+                    }
+                }
+            }
+            System.IO.File.AppendAllText($"{file}.txt", sb.AppendLine().ToString().TrimEnd(','));
+        }
+
         public bool Train(List<double> input, List<double> output)
         {
             if (input.Count != Layers.First().NeuronCount || output.Count != Layers.Last().NeuronCount)

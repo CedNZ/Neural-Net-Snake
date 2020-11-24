@@ -20,7 +20,7 @@ namespace Snake
         static bool tick;
 
         static double learningRate = 0.5;
-        static int[] layers = new[] { 6, 5, 4 };
+        static int[] layers = new[] { 5, 4, 4 };
 
         static int tickInterval = 20;
 
@@ -30,8 +30,11 @@ namespace Snake
         static int current;
         const float MutateChance = 0.01f;
         const float MutationStrength = 0.5f;
-        const int population = 20;
+        const int population = 40;
         static double bestCurrentFitness;
+
+        static Guid runId;
+        static string outputFile;
 
         public static void Main(string[] args)
         {
@@ -48,6 +51,10 @@ namespace Snake
             {
                 neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
             }
+
+            runId = Guid.NewGuid();
+
+            outputFile = $@"C:\temp\SnakeAI\{runId}.txt";
 
             timer = new Timer(Tick, _manualResetEvent, 100, tickInterval);
             //while(true)
@@ -113,8 +120,7 @@ namespace Snake
                 1.0/snake.DistanceToNorthWall,
                 1.0/snake.DistanceToSouthWall,
                 1.0/snake.DistanceToEastWall,
-                1.0/snake.DistanceToWestWall,
-                1.0/snake.Length };
+                1.0/snake.DistanceToWestWall };
 
             var outputs = neuralNet.Run(neuralNetInputs).ToList();
 
@@ -157,14 +163,20 @@ namespace Snake
                 current++;
                 if (current == population)
                 {
+                    Array.Sort(neuralNetworks);
+                    neuralNetworks.Last().Save(outputFile, generation);
+
                     current = 0;
                     generation++;
-                    Array.Sort(neuralNetworks);
-                    for (int i = 0; i < population / 2; i++)
+                    for (int i = 0; i < population; i++)
                     {
-                        if(i <= population / 4)
+                        if(i < population / 5)
                         {
                             neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
+                        }
+                        else if (i >= (population - 2))
+                        {
+
                         }
                         else
                         {
@@ -180,7 +192,7 @@ namespace Snake
 
         public static void Draw()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(MapWidth * (MapHeight + 5));
 
             for(int y = 0; y < MapHeight; y++)
             {
