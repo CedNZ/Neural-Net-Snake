@@ -11,6 +11,7 @@ namespace Snake
         private Direction _direction;
         private readonly int _mapWidth, _mapHeight;
         private int _steps;
+        private int _stepsToDieWithoutFood = 2000;
         private int _loopCount;
         private (int X, int Y) _lastTail;
 
@@ -63,7 +64,8 @@ namespace Snake
 
             if (newHead.X < 0 || newHead.X > _mapWidth - 1 
                 || newHead.Y < 0 || newHead.Y > _mapHeight - 1
-                || OccupiesSquare(newHead))
+                || OccupiesSquare(newHead)
+                || _stepsToDieWithoutFood == 0)
             {
                 Alive = false;
                 return;
@@ -73,6 +75,7 @@ namespace Snake
             {
                 food.Eaten = true;
                 Length++;
+                _stepsToDieWithoutFood = 2000;
             }
 
             if (newHead == _lastTail)
@@ -98,6 +101,7 @@ namespace Snake
             DistanceToEastWall = FirstOrWall(_snake.Where(s => s.Y == newHead.Y && s.X > newHead.X).OrderBy(s => s.X)).X - newHead.X;
 
             _steps++;
+            _stepsToDieWithoutFood--;
         }
 
         public double CartesianDistance((int X, int Y) p, (int X, int Y) q)
