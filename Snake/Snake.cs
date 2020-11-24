@@ -10,6 +10,7 @@ namespace Snake
         private List<(int X, int Y)> _snake;
         private Direction _direction;
         private readonly int _mapWidth, _mapHeight;
+        private int _steps;
 
         public Snake(int mapWidth, int mapHeight)
         {
@@ -28,6 +29,7 @@ namespace Snake
             SnakeDirection = Direction.East;
             Length = 3;
             Alive = true;
+            _steps = 0;
         }
 
         public void Lengthen()
@@ -58,9 +60,7 @@ namespace Snake
                 Alive = false;
                 return;
             }
-
-            DistanceToFood = CartesianDistance(newHead, food.Location);
-
+            
             if (newHead == food.Location)
             {
                 food.Eaten = true;
@@ -69,6 +69,16 @@ namespace Snake
 
             _snake.Insert(0, newHead);
             _snake = _snake.Take(Length).ToList();
+
+            DistanceToFood = CartesianDistance(newHead, food.Location);
+
+            DistanceToNorthWall = newHead.Y - _snake.Where(s => s.X == newHead.X && s.Y < newHead.Y).OrderByDescending(s => s.Y).FirstOrDefault().Y;
+            DistanceToSouthWall = FirstOrWall(_snake.Where(s => s.X == newHead.X && s.Y > newHead.Y).OrderBy(s => s.Y)).Y - newHead.Y;
+
+            DistanceToWestWall = newHead.X - _snake.Where(s => s.Y == newHead.Y && s.X < newHead.X).OrderByDescending(s => s.X).FirstOrDefault().X;
+            DistanceToEastWall = FirstOrWall(_snake.Where(s => s.Y == newHead.Y && s.X > newHead.X).OrderBy(s => s.X)).X - newHead.X;
+
+            _steps++;
         }
 
         public double CartesianDistance((int X, int Y) p, (int X, int Y) q)
@@ -101,16 +111,27 @@ namespace Snake
             }
         }
 
+        public (int X, int Y) FirstOrWall(IEnumerable<(int X, int Y)> ps)
+        {
+            var p = ps.FirstOrDefault();
+            if (p == (0, 0))
+            {
+                p = (_mapWidth - 1, _mapHeight - 1);
+            }
+            return p;
+        }
+
 
         public (int X, int Y) Head => _snake.First();
 
         public int Length { get; private set; }
         public bool Alive { get; private set; }
+        public int Fitness => Length + (_steps / 10);
 
-        public double DistanceToNorthWall => Head.Y;
-        public double DistanceToSouthWall => _mapHeight - 1 - Head.Y;
-        public double DistanceToWestWall => Head.X;
-        public double DistanceToEastWall => _mapWidth - 1 - Head.X;
+        public double DistanceToNorthWall { get; private set; }
+        public double DistanceToSouthWall { get; private set; }
+        public double DistanceToWestWall { get; private set; }
+        public double DistanceToEastWall { get; private set; }
         public double DistanceToFood { get; private set; }
     }
 
