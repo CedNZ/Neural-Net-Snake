@@ -34,6 +34,7 @@ namespace Snake
             Alive = true;
             _steps = 0;
             _lastTail = (0, 0);
+            _stepsToDieWithoutFood = 2000;
         }
 
         public void Lengthen()
