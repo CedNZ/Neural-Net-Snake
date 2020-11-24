@@ -87,11 +87,11 @@ namespace Snake.NeuralNet
             {
                 foreach(var neuron in layer.Neurons)
                 {
-                    neuron.Bias = _random.Next(chance) > 5 ? neuron.Bias += (_random.NextDouble() - val) : neuron.Bias;
+                    neuron.Bias = _random.Next(chance) > 5 ? neuron.Bias += new CryptoRandom().RandomBetween(-val, val) : neuron.Bias;
 
                     foreach(var dendrite in neuron.Dendrites)
                     {
-                        dendrite.Weight = _random.Next(chance) > 5 ? dendrite.Weight += (_random.NextDouble() - val) : dendrite.Weight;
+                        dendrite.Weight = _random.Next(chance) > 5 ? dendrite.Weight += new CryptoRandom().RandomBetween(-val, val) : dendrite.Weight;
                     }
                 }
             }
