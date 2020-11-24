@@ -53,7 +53,7 @@ namespace Snake
             for(int i = 0; i < population; i++)
             {
                 neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
-                neuralNetworks[i].Load(folder, population);
+                neuralNetworks[i].Load(folder, i);
             }
 
             runId = Guid.NewGuid();
