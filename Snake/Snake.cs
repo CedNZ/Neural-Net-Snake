@@ -11,6 +11,8 @@ namespace Snake
         private Direction _direction;
         private readonly int _mapWidth, _mapHeight;
         private int _steps;
+        private int _loopCount;
+        private (int X, int Y) _lastTail;
 
         public Snake(int mapWidth, int mapHeight)
         {
@@ -30,6 +32,7 @@ namespace Snake
             Length = 3;
             Alive = true;
             _steps = 0;
+            _lastTail = (0, 0);
         }
 
         public void Lengthen()
@@ -66,6 +69,17 @@ namespace Snake
                 food.Eaten = true;
                 Length++;
             }
+
+            if (newHead == _lastTail)
+            {
+                _loopCount++;
+                if (_loopCount > 5)
+                {
+                    Alive = false;
+                    return;
+                }
+            }
+            _lastTail = _snake.Last();
 
             _snake.Insert(0, newHead);
             _snake = _snake.Take(Length).ToList();
