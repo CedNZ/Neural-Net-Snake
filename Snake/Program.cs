@@ -22,7 +22,7 @@ namespace Snake
         static double learningRate = 0.5;
         static int[] layers = new[] { 5, 4, 4 };
 
-        static int tickInterval = 20;
+        static int tickInterval = 10;
 
         static NeuralNet.NeuralNetwork neuralNet;
         static NeuralNet.NeuralNetwork[] neuralNetworks;
@@ -35,6 +35,9 @@ namespace Snake
 
         static Guid runId;
         static string outputFile;
+
+        static char[] map;
+        static string folder = $@"C:\temp\SnakeAI";
 
         public static void Main(string[] args)
         {
@@ -50,11 +53,20 @@ namespace Snake
             for(int i = 0; i < population; i++)
             {
                 neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
+                neuralNetworks[i].Load(folder, population);
             }
 
             runId = Guid.NewGuid();
 
-            outputFile = $@"C:\temp\SnakeAI\{runId}.txt";
+            outputFile = $@"{folder}\{runId}";
+
+            map = new char[(MapWidth + 2) * (MapHeight)];
+            Array.Fill(map, ' ');
+            for (int y = 0; y < MapHeight; y++)
+            {
+                map[(y * MapWidth) + (MapWidth)] = '|';
+                map[(y * MapWidth) + (MapWidth + 1)] = '\n';
+            }
 
             timer = new Timer(Tick, _manualResetEvent, 100, tickInterval);
             //while(true)
@@ -67,6 +79,10 @@ namespace Snake
 
         private static void Tick(object state)
         {
+            if (current == population)
+            {
+                current = 0;
+            }
             neuralNet = neuralNetworks[current];
 
             Direction? direction = null;
@@ -100,6 +116,12 @@ namespace Snake
                 {
                     paused = false;
                     tick = true;
+                }
+                if(cki.Key == ConsoleKey.K)
+                {
+                    snake.Kill();
+                    Next();
+                    return;
                 }
 
 
@@ -159,60 +181,71 @@ namespace Snake
             }
             else
             {
-                snake.Create();
-                current++;
-                if (current == population)
+                foreach(var segment in snake.SnakeBody)
                 {
-                    Array.Sort(neuralNetworks);
-                    neuralNetworks.Last().Save(outputFile, generation);
-
-                    current = 0;
-                    generation++;
-                    for (int i = 0; i < population; i++)
-                    {
-                        if(i < population / 5)
-                        {
-                            neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
-                        }
-                        else if (i >= (population - 2))
-                        {
-
-                        }
-                        else
-                        {
-                            neuralNetworks[i] = neuralNetworks[population - (i % 2) - 1].Clone();
-                            neuralNetworks[i].Mutate((int)(1 / MutateChance), MutationStrength);
-                        }
-                    }
+                    map[segment.Y * MapWidth + segment.X] = ' ';
                 }
+                
+                Next();
             }
 
             Draw();
         }
 
+        public static void Next()
+        {
+            snake.Create();
+
+            current++;
+            if(current == population)
+            {
+                Array.Sort(neuralNetworks);
+                neuralNetworks.Last().Save(outputFile, generation);
+
+                current = 0;
+                generation++;
+                for(int i = 0; i < population - 1; i++)
+                {
+                    if(i < population / 10)
+                    {
+                        neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
+                    }
+                    else if(i >= (population - 3))
+                    {
+                        neuralNetworks[i].Mutate(10, 0.2f);
+                    }
+                    else
+                    {
+                        neuralNetworks[i] = neuralNetworks[population - (i % 2) - 1].Clone();
+                        neuralNetworks[i].Mutate((int)(1 / MutateChance), MutationStrength);
+                    }
+                }
+            }
+        }
+
         public static void Draw()
         {
-            StringBuilder sb = new StringBuilder(MapWidth * (MapHeight + 5));
+            map[food.Location.Y * MapWidth + food.Location.X] = 'ᴥ';
+            map[snake.Last.Y * MapWidth + snake.Last.X] = ' ';
 
             for(int y = 0; y < MapHeight; y++)
             {
-                for(int x = 0; x < MapWidth; x++)
-                {
-                    sb.Append(
-                        snake.OccupiesSquare(x, y)
-                            ? "●"
-                            : food.Location == (x, y)
-                                ? "ᴥ"
-                                : " ");
-                }
-                sb.AppendLine("|");
+                map[(y * MapWidth) + (MapWidth)] = '|';
+                map[(y * MapWidth) + (MapWidth + 1)] = '\n';
             }
-            sb.AppendLine($"\nSnake Distances to Walls: N:{snake.DistanceToNorthWall} S:{snake.DistanceToSouthWall} W:{snake.DistanceToWestWall} E:{snake.DistanceToEastWall} F:{snake.DistanceToFood:F2} Length: {snake.Length}\n\tGeneration: {generation}, Current: {current}, Fitness: {neuralNet.Fitness}.\t BestLastFitness: {neuralNetworks.Last().Fitness}, BestCurrentFitness:{bestCurrentFitness}");            //sb.AppendLine($"Snake Head: {snake.Head}");
-            sb.AppendLine($"NN Outputs: {nOut[0]} {nOut[1]} {nOut[2]} {nOut[3]}");
-            if(!snake.Alive)
+            foreach(var segment in snake.SnakeBody)
             {
-                sb.AppendLine("You Died");
+                map[segment.Y * MapWidth + segment.X] = '●';
             }
+
+
+            StringBuilder sb = new StringBuilder((MapWidth + 2) * (MapHeight + 5));
+
+            sb.Append(new string(map));
+
+            sb.AppendLine($"\nSnake Distances to Walls: N:{snake.DistanceToNorthWall} S:{snake.DistanceToSouthWall} W:{snake.DistanceToWestWall} E:{snake.DistanceToEastWall} F:{snake.DistanceToFood:F2} Length: {snake.Length}");
+            sb.AppendLine($"Generation: {generation}, Current: {current}, Fitness: {neuralNet.Fitness}.\t BestLastFitness: {neuralNetworks.Last().Fitness}, BestCurrentFitness:{bestCurrentFitness}");            //sb.AppendLine($"Snake Head: {snake.Head}");
+            sb.AppendLine($"NN Outputs: {nOut[0]} {nOut[1]} {nOut[2]} {nOut[3]}");
 
             Console.Clear();
             Console.Write(sb.ToString());

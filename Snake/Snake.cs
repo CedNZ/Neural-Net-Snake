@@ -40,6 +40,11 @@ namespace Snake
             Length++;
         }
 
+        public void Kill()
+        {
+            Alive = false;
+        }
+
         public void Move(Direction? direction, Food food)
         {
             SnakeDirection = direction;
@@ -137,10 +142,13 @@ namespace Snake
 
 
         public (int X, int Y) Head => _snake.First();
+        public (int X, int Y) Last => _lastTail;
+
+        public IEnumerable<(int X, int Y)> SnakeBody => _snake;
 
         public int Length { get; private set; }
         public bool Alive { get; private set; }
-        public double Fitness => (Length * 10) + ((double)_steps / 100);
+        public double Fitness => (Length * 1000) + ((double)_steps / 1000);
 
         public double DistanceToNorthWall { get; private set; }
         public double DistanceToSouthWall { get; private set; }

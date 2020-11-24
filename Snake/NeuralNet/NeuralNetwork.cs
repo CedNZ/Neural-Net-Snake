@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -148,6 +149,39 @@ namespace Snake.NeuralNet
                 }
             }
             System.IO.File.AppendAllText($"{file}.txt", sb.AppendLine().ToString().TrimEnd(','));
+        }
+
+        public void Load(string folder, int population)
+        {
+            try
+            {
+                DirectoryInfo directoryInfo = new DirectoryInfo(folder);
+                var fileName = directoryInfo.GetFiles("*.txt").OrderByDescending(x => x.LastWriteTime).First().FullName;
+
+                var lines = File.ReadAllLines(fileName).ToList();
+
+                lines.Reverse();
+
+                int i = 0;
+                foreach(var layer in Layers)
+                {
+                    var line = lines.Skip(population).First();
+                    foreach(var neuron in layer.Neurons)
+                    {
+                        neuron.Bias = double.Parse(line.Split(',').Skip(2 + i).First());
+                        i++;
+                        foreach(var dendrite in neuron.Dendrites)
+                        {
+                            dendrite.Weight = neuron.Bias = double.Parse(line.Split(',').Skip(2 + i).First());
+                            i++;
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+            }
         }
 
         public bool Train(List<double> input, List<double> output)
