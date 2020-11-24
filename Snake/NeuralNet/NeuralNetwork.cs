@@ -7,10 +7,13 @@ namespace Snake.NeuralNet
 {
     public class NeuralNetwork
     {
+        private Random _random;
         public List<Layer> Layers { get; set; }
         public double LearningRate { get; set; }
 
         public int LayerCount => Layers.Count();
+
+        private int[] _layers;
 
         public NeuralNetwork(double learningRate, int[] layers)
         {
@@ -19,6 +22,7 @@ namespace Snake.NeuralNet
                 return;
             }
 
+            _layers = layers;
             LearningRate = learningRate;
             Layers = new List<Layer>();
 
@@ -47,11 +51,49 @@ namespace Snake.NeuralNet
                     }
                 });
             }
+
+            _random = new Random();
+        }
+
+        public NeuralNetwork Clone()
+        {
+            NeuralNetwork newNet = new NeuralNetwork(LearningRate, _layers);
+
+            for(int l = 0; l < _layers.Length; l++)
+            {
+                for(int n = 0; n < _layers[l]; n++)
+                {
+                    newNet.Layers[l].Neurons[n].Bias = this.Layers[l].Neurons[n].Bias;
+
+                    for (int d = 0; d < newNet.Layers[l].Neurons[n].DendriteCount; d++)
+                    {
+                        newNet.Layers[l].Neurons[n].Dendrites[d].Weight = this.Layers[l].Neurons[n].Dendrites[d].Weight;
+                    }
+                }
+            }
+
+            return newNet;
         }
 
         public double Sigmoid(double x)
         {
             return 1 / (1 + Math.Exp(-x));
+        }
+
+        public void Mutate(int chance, float val) //simple mutatution algorithm, taken from: https://github.com/kipgparker/MutationNetwork/blob/master/Mutation%20Neural%20Network/Assets/NeuralNetwork.cs
+        {
+            foreach(var layer in Layers)
+            {
+                foreach(var neuron in layer.Neurons)
+                {
+                    neuron.Bias = _random.Next(chance) > 5 ? neuron.Bias += (_random.NextDouble() - val) : neuron.Bias;
+
+                    foreach(var dendrite in neuron.Dendrites)
+                    {
+                        dendrite.Weight = _random.Next(chance) > 5 ? dendrite.Weight += (_random.NextDouble() - val) : dendrite.Weight;
+                    }
+                }
+            }
         }
 
         public double[] Run(List<double> input)
