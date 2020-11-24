@@ -10,7 +10,7 @@ namespace Snake
     {
         static ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
 
-        const int MapWidth = 200;
+        const int MapWidth = 100;
         const int MapHeight = 50;
         static Snake snake;
         static Timer timer;
@@ -19,9 +19,16 @@ namespace Snake
         static bool paused;
         static bool tick;
 
-        static int tickInterval = 50;
+        static int tickInterval = 20;
 
         static NeuralNet.NeuralNetwork neuralNet;
+        static NeuralNet.NeuralNetwork[] neuralNetworks;
+        static int generation;
+        static int current;
+        const float MutateChance = 0.01f;
+        const float MutationStrength = 0.5f;
+        const int population = 20;
+        static double bestCurrentFitness;
 
         public static void Main(string[] args)
         {
@@ -29,7 +36,15 @@ namespace Snake
 
             snake = new Snake(MapWidth, MapHeight);
             food = new Food(MapWidth, MapHeight);
-            neuralNet = new NeuralNet.NeuralNetwork(0.5, new[] { 6, 5, 4 });
+
+            generation = 0;
+            current = 0;
+
+            neuralNetworks = new NeuralNet.NeuralNetwork[population];
+            for(int i = 0; i < population; i++)
+            {
+                neuralNetworks[i] = new NeuralNet.NeuralNetwork(0.5, new[] { 6, 5, 4 });
+            }
 
             timer = new Timer(Tick, _manualResetEvent, 100, tickInterval);
             //while(true)
@@ -42,6 +57,8 @@ namespace Snake
 
         private static void Tick(object state)
         {
+            neuralNet = neuralNetworks[current];
+
             Direction? direction = null;
             if (tick)
             {
@@ -125,6 +142,27 @@ namespace Snake
             if(snake.Alive)
             {
                 snake.Move(direction, food);
+                neuralNet.Fitness = snake.Fitness;
+                if (snake.Fitness > bestCurrentFitness)
+                {
+                    bestCurrentFitness = snake.Fitness;
+                }
+            }
+            else
+            {
+                snake.Create();
+                current++;
+                if (current == population)
+                {
+                    current = 0;
+                    generation++;
+                    Array.Sort(neuralNetworks);
+                    for (int i = 0; i < population / 2; i++)
+                    {
+                        neuralNetworks[i] = neuralNetworks[i + population / 2].Clone();
+                        neuralNetworks[i].Mutate((int)(1 / MutateChance), MutationStrength);
+                    }
+                }
             }
 
             Draw();
@@ -145,10 +183,9 @@ namespace Snake
                                 ? "ᴥ"
                                 : " ");
                 }
-                sb.AppendLine();
+                sb.AppendLine("|");
             }
-            sb.AppendLine($"\nSnake Distances to Walls: N:{snake.DistanceToNorthWall} S:{snake.DistanceToSouthWall} W:{snake.DistanceToWestWall} E:{snake.DistanceToEastWall} F:{snake.DistanceToFood:F2} Length: {snake.Length}");
-            //sb.AppendLine($"Snake Head: {snake.Head}");
+            sb.AppendLine($"\nSnake Distances to Walls: N:{snake.DistanceToNorthWall} S:{snake.DistanceToSouthWall} W:{snake.DistanceToWestWall} E:{snake.DistanceToEastWall} F:{snake.DistanceToFood:F2} Length: {snake.Length}\n\tGeneration: {generation}, Current: {current}, Fitness: {neuralNet.Fitness}.\t BestLastFitness: {neuralNetworks.Last().Fitness}, BestCurrentFitness:{bestCurrentFitness}");            //sb.AppendLine($"Snake Head: {snake.Head}");
             sb.AppendLine($"NN Outputs: {nOut[0]} {nOut[1]} {nOut[2]} {nOut[3]}");
             if(!snake.Alive)
             {

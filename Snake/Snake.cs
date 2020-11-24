@@ -126,7 +126,7 @@ namespace Snake
 
         public int Length { get; private set; }
         public bool Alive { get; private set; }
-        public int Fitness => Length + (_steps / 10);
+        public double Fitness => (Length * 10) + ((double)_steps / 100);
 
         public double DistanceToNorthWall { get; private set; }
         public double DistanceToSouthWall { get; private set; }

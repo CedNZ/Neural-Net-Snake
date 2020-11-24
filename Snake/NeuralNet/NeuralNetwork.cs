@@ -5,11 +5,12 @@ using System.Text;
 
 namespace Snake.NeuralNet
 {
-    public class NeuralNetwork
+    public class NeuralNetwork : IComparable<NeuralNetwork>
     {
         private Random _random;
         public List<Layer> Layers { get; set; }
         public double LearningRate { get; set; }
+        public double Fitness { get; set; }
 
         public int LayerCount => Layers.Count();
 
@@ -170,6 +171,11 @@ namespace Snake.NeuralNet
             }
 
             return true;
+        }
+
+        public int CompareTo(NeuralNetwork obj)
+        {
+            return Fitness.CompareTo(obj.Fitness);
         }
     }
 }
