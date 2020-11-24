@@ -19,6 +19,9 @@ namespace Snake
         static bool paused;
         static bool tick;
 
+        static double learningRate = 0.5;
+        static int[] layers = new[] { 6, 5, 4 };
+
         static int tickInterval = 20;
 
         static NeuralNet.NeuralNetwork neuralNet;
@@ -43,7 +46,7 @@ namespace Snake
             neuralNetworks = new NeuralNet.NeuralNetwork[population];
             for(int i = 0; i < population; i++)
             {
-                neuralNetworks[i] = new NeuralNet.NeuralNetwork(0.5, new[] { 6, 5, 4 });
+                neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
             }
 
             timer = new Timer(Tick, _manualResetEvent, 100, tickInterval);
@@ -75,7 +78,7 @@ namespace Snake
                 }
                 if(cki.Key == ConsoleKey.R)
                 {
-                    neuralNet = new NeuralNet.NeuralNetwork(0.5, new[] { 6, 5, 4 });
+                    neuralNet = new NeuralNet.NeuralNetwork(learningRate, layers);
                     snake.Create();
                 }
                 if(cki.Key == ConsoleKey.L)
@@ -159,8 +162,15 @@ namespace Snake
                     Array.Sort(neuralNetworks);
                     for (int i = 0; i < population / 2; i++)
                     {
-                        neuralNetworks[i] = neuralNetworks[i + population / 2].Clone();
-                        neuralNetworks[i].Mutate((int)(1 / MutateChance), MutationStrength);
+                        if(i <= population / 4)
+                        {
+                            neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
+                        }
+                        else
+                        {
+                            neuralNetworks[i] = neuralNetworks[population - (i % 2) - 1].Clone();
+                            neuralNetworks[i].Mutate((int)(1 / MutateChance), MutationStrength);
+                        }
                     }
                 }
             }
