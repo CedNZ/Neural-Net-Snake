@@ -20,7 +20,7 @@ namespace Snake
         static bool tick;
 
         static double learningRate = 0.5;
-        static int[] layers = new[] { 5, 4, 4 };
+        static int[] layers = new[] { 5, 4, 3, 4 };
 
         static int tickInterval = 10;
 
@@ -204,7 +204,7 @@ namespace Snake
 
                 current = 0;
                 generation++;
-                for(int i = 0; i < population - 1; i++)
+                for(int i = 0; i < population; i++)
                 {
                     if(i < population / 10)
                     {
