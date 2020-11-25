@@ -11,7 +11,8 @@ namespace Snake
         private Direction _direction;
         private readonly int _mapWidth, _mapHeight;
         private int _steps;
-        private int _stepsToDieWithoutFood = 2000;
+        private int _stepsToDieWithoutFood;
+        private int _defaultStepsWithoutFood = 5000;
         private int _loopCount;
         private (int X, int Y) _lastTail;
 
@@ -34,7 +35,7 @@ namespace Snake
             Alive = true;
             _steps = 0;
             _lastTail = (0, 0);
-            _stepsToDieWithoutFood = 2000;
+            _stepsToDieWithoutFood = _defaultStepsWithoutFood;
         }
 
         public void Lengthen()
@@ -76,7 +77,7 @@ namespace Snake
             {
                 food.Eaten = true;
                 Length++;
-                _stepsToDieWithoutFood = 2000;
+                _stepsToDieWithoutFood = _defaultStepsWithoutFood;
             }
 
             if (newHead == _lastTail)

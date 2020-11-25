@@ -77,9 +77,9 @@ namespace Snake.NeuralNet
             return newNet;
         }
 
-        public double Sigmoid(double x)
+        public double ActivationFunction(double x)
         {
-            return 1 / (1 + Math.Exp(-x));
+            return x / (1 + Math.Exp(-x));
         }
 
         public void Mutate(int chance, float val) //simple mutatution algorithm, taken from: https://github.com/kipgparker/MutationNetwork/blob/master/Mutation%20Neural%20Network/Assets/NeuralNetwork.cs
@@ -124,7 +124,7 @@ namespace Snake.NeuralNet
                         {
                             neuron.Value = neuron.Value + Layers[l - 1].Neurons[np].Value * neuron.Dendrites[np].Weight;
                         }
-                        neuron.Value = Sigmoid(neuron.Value + neuron.Bias);
+                        neuron.Value = ActivationFunction(neuron.Value + neuron.Bias);
                     }
                 }
             }
@@ -148,7 +148,7 @@ namespace Snake.NeuralNet
                     }
                 }
             }
-            System.IO.File.AppendAllText($"{file}.txt", sb.AppendLine().ToString().TrimEnd(','));
+            System.IO.File.AppendAllText($"{file}.csv", sb.AppendLine().ToString().TrimEnd(','));
         }
 
         public void Load(string folder, int population)
@@ -156,7 +156,7 @@ namespace Snake.NeuralNet
             try
             {
                 DirectoryInfo directoryInfo = new DirectoryInfo(folder);
-                var fileName = directoryInfo.GetFiles("*.txt").OrderByDescending(x => x.LastWriteTime).First().FullName;
+                var fileName = directoryInfo.GetFiles("*.csv").OrderByDescending(x => x.LastWriteTime).First().FullName;
 
                 var lines = File.ReadAllLines(fileName).ToList();
 
