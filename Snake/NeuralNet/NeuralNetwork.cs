@@ -79,7 +79,8 @@ namespace Snake.NeuralNet
 
         public double ActivationFunction(double x)
         {
-            return x / (1 + Math.Exp(-x));
+            return Math.Tanh(x);
+            //return x / (1 + Math.Exp(-x));
         }
 
         public void Mutate(int chance, float val) //simple mutatution algorithm, taken from: https://github.com/kipgparker/MutationNetwork/blob/master/Mutation%20Neural%20Network/Assets/NeuralNetwork.cs
@@ -160,7 +161,7 @@ namespace Snake.NeuralNet
 
                 var lines = File.ReadAllLines(fileName).ToList();
 
-                lines.Reverse();
+                lines = lines.OrderByDescending(l => l.Split(',')[1]).ToList();
 
                 int i = 0;
                 foreach(var layer in Layers)
