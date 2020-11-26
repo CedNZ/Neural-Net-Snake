@@ -19,8 +19,8 @@ namespace Snake
 
         public void Generate()
         {
-            var x = _random.Next(_mapWidth-1)+1;
-            var y = _random.Next(_mapHeight-1)+1;
+            var x = _random.Next(_mapWidth-2)+1;
+            var y = _random.Next(_mapHeight-2)+1;
 
             Location = (x, y);
             Eaten = false;
