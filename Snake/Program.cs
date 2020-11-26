@@ -32,6 +32,7 @@ namespace Snake
         const float MutationStrength = 0.5f;
         const int population = 40;
         static double bestCurrentFitness;
+        static double bestOverallFitness;
 
         static Guid runId;
         static string outputFile;
@@ -190,6 +191,10 @@ namespace Snake
                 if (snake.Fitness > bestCurrentFitness)
                 {
                     bestCurrentFitness = snake.Fitness;
+                    if (bestCurrentFitness > bestOverallFitness)
+                    {
+                        bestOverallFitness = bestCurrentFitness;
+                    }
                 }
             }
             else
@@ -211,6 +216,7 @@ namespace Snake
                 neuralNetworks.Last().Save(outputFile, generation);
 
                 current = 0;
+                bestCurrentFitness = 0;
                 generation++;
                 for(int i = 0; i < population-1; i++)
                 {
@@ -250,7 +256,7 @@ namespace Snake
             }
 
             sb.AppendLine($"\nSnake Distances to Walls: N:{snake.DistanceToNorthWall} S:{snake.DistanceToSouthWall} W:{snake.DistanceToWestWall} E:{snake.DistanceToEastWall} F:{snake.DistanceToFood:F2} S:{snake.LookingAtFood} Length: {snake.Length} Head:{snake.Head} Food:{food.Location}");
-            sb.AppendLine($"Generation: {generation}, Current: {current}, Fitness: {neuralNet.Fitness}.\t BestLastFitness: {neuralNetworks.Last().Fitness}, BestCurrentFitness:{bestCurrentFitness}");            //sb.AppendLine($"Snake Head: {snake.Head}");
+            sb.AppendLine($"Generation: {generation}, Current: {current}, Fitness: {neuralNet.Fitness}.\t BestLastFitness: {neuralNetworks.Last().Fitness}, BestCurrentFitness:{bestCurrentFitness}, BestOverallFitness:{bestOverallFitness} ");            //sb.AppendLine($"Snake Head: {snake.Head}");
             sb.AppendLine($"NN Outputs: {nOut[0]} {nOut[1]} {nOut[2]} {nOut[3]}");
 
             Console.Clear();
