@@ -224,6 +224,11 @@ namespace Snake
                     {
                         neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
                     }
+                    else if (i < population / 5)
+                    {
+                        neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
+                        neuralNetworks[i].Breed(neuralNetworks[population - 1], neuralNetworks[population - 2]);
+                    }
                     else if(i >= (population - 3))
                     {
                         neuralNetworks[i].Mutate(10, 0.2f);
