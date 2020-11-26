@@ -99,6 +99,41 @@ namespace Snake.NeuralNet
             }
         }
 
+        public void Breed(NeuralNetwork firstParent, NeuralNetwork secondParent)
+        {
+            for(int l = 0; l < LayerCount; l++)
+            {
+                var layer = Layers[l];
+
+                for(int n = 0; n < layer.NeuronCount; n++)
+                {
+                    var neuron = layer.Neurons[n];
+
+                    for (int d = 0; d < neuron.DendriteCount; d++)
+                    {
+                        var dendrite = neuron.Dendrites[d];
+
+                        dendrite.Weight = RandomBetween((float)firstParent.Layers[l].Neurons[n].Dendrites[d].Weight, (float)secondParent.Layers[l].Neurons[n].Dendrites[d].Weight);
+                    }
+
+                    neuron.Bias = RandomBetween((float)firstParent.Layers[l].Neurons[n].Bias, (float)secondParent.Layers[l].Neurons[n].Bias);
+                }
+            }
+        }
+
+        public float RandomBetween(float first, float second)
+        {
+            var min = Math.Min(first, second);
+            var max = Math.Max(first, second);
+            var result = _random.Next(0, 3) switch
+            {
+                0 => min,
+                1 => max,
+                _ => (float)new CryptoRandom().RandomBetween(min, max)
+            };
+            return result;
+        }
+
         public double[] Run(List<double> input)
         {
             if(input.Count != Layers.First().NeuronCount)
