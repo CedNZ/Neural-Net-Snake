@@ -12,7 +12,7 @@ namespace Snake
         private readonly int _mapWidth, _mapHeight;
         private int _steps;
         private int _stepsToDieWithoutFood;
-        private int _defaultStepsWithoutFood = 5000;
+        private int _defaultStepsWithoutFood = 1000;
         private int _loopCount;
         private (int X, int Y) _lastTail;
 
@@ -64,8 +64,8 @@ namespace Snake
                 _ => throw new NotImplementedException()
             };
 
-            if (newHead.X < 0 || newHead.X > _mapWidth - 1 
-                || newHead.Y < 0 || newHead.Y > _mapHeight - 1
+            if (newHead.X <= 0 || newHead.X >= _mapWidth
+                || newHead.Y <= 0 || newHead.Y >= _mapHeight
                 || OccupiesSquare(newHead)
                 || _stepsToDieWithoutFood == 0)
             {
@@ -94,9 +94,28 @@ namespace Snake
             _snake.Insert(0, newHead);
             _snake = _snake.Take(Length).ToList();
 
-            DistanceToFood = CartesianDistance(newHead, food.Location);
+            DistanceToFood = -CartesianDistance(newHead, food.Location);
 
-            DistanceToNorthWall = newHead.Y - _snake.Where(s => s.X == newHead.X && s.Y < newHead.Y).OrderByDescending(s => s.Y).FirstOrDefault().Y;
+            LookingAtFood = 0;
+            if (newHead.X == food.Location.X || newHead.Y == food.Location.Y)
+            {
+                if (SnakeDirection == Direction.North && newHead.Y > food.Location.Y
+                    || SnakeDirection == Direction.South && newHead.Y < food.Location.Y
+                    || SnakeDirection == Direction.East && newHead.X < food.Location.X
+                    || SnakeDirection == Direction.West && newHead.X > food.Location.X)
+                {
+                    LookingAtFood = -1.0;
+                }
+                if(SnakeDirection == Direction.North && newHead.Y == food.Location.Y
+                    || SnakeDirection == Direction.South && newHead.Y == food.Location.Y
+                    || SnakeDirection == Direction.East && newHead.X == food.Location.X
+                    || SnakeDirection == Direction.West && newHead.X == food.Location.X)
+                {
+                    LookingAtFood = -0.5;
+                }
+            }
+
+            DistanceToNorthWall = newHead.Y - _snake.Where(s => s.X == newHead.X && s.Y < newHead.Y).OrderByDescending(s => s.Y).FirstOrDefault().Y ;
             DistanceToSouthWall = FirstOrWall(_snake.Where(s => s.X == newHead.X && s.Y > newHead.Y).OrderBy(s => s.Y)).Y - newHead.Y;
 
             DistanceToWestWall = newHead.X - _snake.Where(s => s.Y == newHead.Y && s.X < newHead.X).OrderByDescending(s => s.X).FirstOrDefault().X;
@@ -141,7 +160,7 @@ namespace Snake
             var p = ps.FirstOrDefault();
             if (p == (0, 0))
             {
-                p = (_mapWidth - 1, _mapHeight - 1);
+                p = (_mapWidth, _mapHeight);
             }
             return p;
         }
@@ -161,6 +180,7 @@ namespace Snake
         public double DistanceToWestWall { get; private set; }
         public double DistanceToEastWall { get; private set; }
         public double DistanceToFood { get; private set; }
+        public double LookingAtFood { get; private set; }
     }
 
     public enum Direction

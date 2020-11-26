@@ -10,8 +10,8 @@ namespace Snake
     {
         static ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
 
-        const int MapWidth = 100;
-        const int MapHeight = 50;
+        const int MapWidth = 20;
+        const int MapHeight = 20;
         static Snake snake;
         static Timer timer;
         static Food food;
@@ -20,7 +20,7 @@ namespace Snake
         static bool tick;
 
         static double learningRate = 0.5;
-        static int[] layers = new[] { 5, 4, 3, 4 };
+        static int[] layers = new[] { 6, 5, 4, 4 };
 
         static int tickInterval = 10;
 
@@ -36,8 +36,8 @@ namespace Snake
         static Guid runId;
         static string outputFile;
 
-        static char[] map;
         static string folder = $@"C:\temp\SnakeAI";
+        static string foodLocInputBuffer;
 
         public static void Main(string[] args)
         {
@@ -59,14 +59,6 @@ namespace Snake
             runId = Guid.NewGuid();
 
             outputFile = $@"{folder}\{runId}";
-
-            map = new char[(MapWidth + 2) * (MapHeight)];
-            Array.Fill(map, ' ');
-            for (int y = 0; y < MapHeight; y++)
-            {
-                map[(y * MapWidth) + (MapWidth)] = '|';
-                map[(y * MapWidth) + (MapWidth + 1)] = '\n';
-            }
 
             timer = new Timer(Tick, _manualResetEvent, 100, tickInterval);
             //while(true)
@@ -123,6 +115,14 @@ namespace Snake
                     Next();
                     return;
                 }
+                if(cki.Key == ConsoleKey.F)
+                {
+                    do
+                    {
+                        food.Generate();
+                    }
+                    while(snake.OccupiesSquare(food.Location));
+                }
 
 
                 direction = cki.Key switch
@@ -133,12 +133,25 @@ namespace Snake
                     ConsoleKey.LeftArrow => Direction.West,
                     _ => null,
                 };
+
+                if (int.TryParse(cki.KeyChar.ToString(), out var num))
+                {
+                    foodLocInputBuffer += num;
+                    if (foodLocInputBuffer.Length == 4)
+                    {
+                        var x = int.Parse(foodLocInputBuffer.Substring(0, 2));
+                        var y = int.Parse(foodLocInputBuffer.Substring(2, 2));
+                        food.Location = (x, y);
+                        foodLocInputBuffer = "";
+                    }
+                }
             }
 
             if(paused) return;
 
 
             List<double> neuralNetInputs = new List<double> { 1.0/snake.DistanceToFood,
+                snake.LookingAtFood,
                 1.0/snake.DistanceToNorthWall,
                 1.0/snake.DistanceToSouthWall,
                 1.0/snake.DistanceToEastWall,
@@ -180,12 +193,7 @@ namespace Snake
                 }
             }
             else
-            {
-                foreach(var segment in snake.SnakeBody)
-                {
-                    map[segment.Y * MapWidth + segment.X] = ' ';
-                }
-                
+            {                
                 Next();
             }
 
@@ -204,7 +212,7 @@ namespace Snake
 
                 current = 0;
                 generation++;
-                for(int i = 0; i < population; i++)
+                for(int i = 0; i < population-1; i++)
                 {
                     if(i < population / 10)
                     {
@@ -225,25 +233,23 @@ namespace Snake
 
         public static void Draw()
         {
-            map[food.Location.Y * MapWidth + food.Location.X] = 'ᴥ';
-            map[snake.Last.Y * MapWidth + snake.Last.X] = ' ';
+            StringBuilder sb = new StringBuilder(MapWidth * (MapHeight + 5));
 
             for(int y = 0; y < MapHeight; y++)
             {
-                map[(y * MapWidth) + (MapWidth)] = '|';
-                map[(y * MapWidth) + (MapWidth + 1)] = '\n';
+                for(int x = 0; x < MapWidth; x++)
+                {
+                    sb.Append(
+                        snake.OccupiesSquare(x, y)
+                            ? "●"
+                            : food.Location == (x, y)
+                                ? "ᴥ"
+                                : " ");
+                }
+                sb.AppendLine("|");
             }
-            foreach(var segment in snake.SnakeBody)
-            {
-                map[segment.Y * MapWidth + segment.X] = '●';
-            }
 
-
-            StringBuilder sb = new StringBuilder((MapWidth + 2) * (MapHeight + 5));
-
-            sb.Append(new string(map));
-
-            sb.AppendLine($"\nSnake Distances to Walls: N:{snake.DistanceToNorthWall} S:{snake.DistanceToSouthWall} W:{snake.DistanceToWestWall} E:{snake.DistanceToEastWall} F:{snake.DistanceToFood:F2} Length: {snake.Length}");
+            sb.AppendLine($"\nSnake Distances to Walls: N:{snake.DistanceToNorthWall} S:{snake.DistanceToSouthWall} W:{snake.DistanceToWestWall} E:{snake.DistanceToEastWall} F:{snake.DistanceToFood:F2} S:{snake.LookingAtFood} Length: {snake.Length} Head:{snake.Head} Food:{food.Location}");
             sb.AppendLine($"Generation: {generation}, Current: {current}, Fitness: {neuralNet.Fitness}.\t BestLastFitness: {neuralNetworks.Last().Fitness}, BestCurrentFitness:{bestCurrentFitness}");            //sb.AppendLine($"Snake Head: {snake.Head}");
             sb.AppendLine($"NN Outputs: {nOut[0]} {nOut[1]} {nOut[2]} {nOut[3]}");
 
