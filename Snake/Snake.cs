@@ -12,7 +12,7 @@ namespace Snake
         private readonly int _mapWidth, _mapHeight;
         private int _steps;
         private int _stepsToDieWithoutFood;
-        private int _defaultStepsWithoutFood = 1000;
+        private int _defaultStepsWithoutFood = 2500;
         private int _loopCount;
         private (int X, int Y) _lastTail;
 
@@ -157,12 +157,21 @@ namespace Snake
 
         public (int X, int Y) FirstOrWall(IEnumerable<(int X, int Y)> ps)
         {
-            var p = ps.FirstOrDefault();
-            if (p == (0, 0))
+            try
             {
-                p = (_mapWidth, _mapHeight);
+
+
+                var p = ps.FirstOrDefault();
+                if(p == (0, 0))
+                {
+                    p = (_mapWidth, _mapHeight);
+                }
+                return p;
             }
-            return p;
+            catch (InvalidOperationException)
+            {
+                return (0, 0);
+            }
         }
 
 

@@ -83,17 +83,17 @@ namespace Snake.NeuralNet
             //return x / (1 + Math.Exp(-x));
         }
 
-        public void Mutate(int chance, float val) //simple mutatution algorithm, taken from: https://github.com/kipgparker/MutationNetwork/blob/master/Mutation%20Neural%20Network/Assets/NeuralNetwork.cs
+        public void Mutate(float chance, float val) //simple mutatution algorithm, taken from: https://github.com/kipgparker/MutationNetwork/blob/master/Mutation%20Neural%20Network/Assets/NeuralNetwork.cs
         {
             foreach(var layer in Layers)
             {
                 foreach(var neuron in layer.Neurons)
                 {
-                    neuron.Bias = _random.Next(chance) > 5 ? neuron.Bias += new CryptoRandom().RandomBetween(-val, val) : neuron.Bias;
+                    neuron.Bias = new CryptoRandom().RandomValue > chance ? neuron.Bias += new CryptoRandom().RandomBetween(-val, val) : neuron.Bias;
 
                     foreach(var dendrite in neuron.Dendrites)
                     {
-                        dendrite.Weight = _random.Next(chance) > 5 ? dendrite.Weight += new CryptoRandom().RandomBetween(-val, val) : dendrite.Weight;
+                        dendrite.Weight = new CryptoRandom().RandomValue > chance ? dendrite.Weight += new CryptoRandom().RandomBetween(-val, val) : dendrite.Weight;
                     }
                 }
             }
@@ -196,7 +196,7 @@ namespace Snake.NeuralNet
 
                 var lines = File.ReadAllLines(fileName).ToList();
 
-                lines = lines.OrderByDescending(l => l.Split(',')[1]).ToList();
+                lines = lines.OrderByDescending(l => double.Parse(l.Split(',')[1])).ToList();
 
                 int i = 0;
                 foreach(var layer in Layers)

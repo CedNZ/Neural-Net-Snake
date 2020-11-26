@@ -28,8 +28,8 @@ namespace Snake
         static NeuralNet.NeuralNetwork[] neuralNetworks;
         static int generation;
         static int current;
-        const float MutateChance = 0.01f;
-        const float MutationStrength = 0.5f;
+        const float MutateChance = 0.10f;
+        const float MutationStrength = 0.05f;
         const int population = 40;
         static double bestCurrentFitness;
         static double bestOverallFitness;
@@ -61,7 +61,7 @@ namespace Snake
 
             outputFile = $@"{folder}\{runId}";
 
-            timer = new Timer(Tick, _manualResetEvent, 100, tickInterval);
+            timer = new Timer(Tick, _manualResetEvent, 1000, tickInterval);
             //while(true)
             //{
             //    Tick(_manualResetEvent);
@@ -220,11 +220,11 @@ namespace Snake
                 generation++;
                 for(int i = 0; i < population-1; i++)
                 {
-                    if(i < population / 10)
+                    if(i < population / 20)
                     {
                         neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
                     }
-                    else if (i < population / 5)
+                    else if (i < population / 3)
                     {
                         neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
                         neuralNetworks[i].Breed(neuralNetworks[population - 1], neuralNetworks[population - 2]);
