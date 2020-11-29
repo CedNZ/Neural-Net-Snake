@@ -9,7 +9,7 @@ namespace Snake.NeuralNet
     {
         public List<Dendrite> Dendrites { get; set; }
         public double Bias { get; set; }
-        public double Delta { get; set; }
+        public double Delta { get; set; } //used for training
         public double Value { get; set; }
 
         public int DendriteCount => Dendrites.Count();

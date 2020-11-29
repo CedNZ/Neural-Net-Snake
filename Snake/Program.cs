@@ -10,8 +10,8 @@ namespace Snake
     {
         static ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
 
-        const int MapWidth = 20;
-        const int MapHeight = 20;
+        const int MapWidth = 75;
+        const int MapHeight = 25;
         static Snake snake;
         static Timer timer;
         static Food food;
@@ -30,7 +30,7 @@ namespace Snake
         static int current;
         const float MutateChance = 0.10f;
         const float MutationStrength = 0.05f;
-        const int population = 40;
+        const int population = 50;
         static double bestCurrentFitness;
         static double bestOverallFitness;
 
@@ -162,7 +162,7 @@ namespace Snake
 
             nOut = outputs;            
 
-            var highest = outputs.IndexOf(outputs.Max());
+            var highest = outputs.IndexOf(outputs.Max(Math.Abs));
 
             direction = highest switch
             {
@@ -218,26 +218,30 @@ namespace Snake
                 current = 0;
                 bestCurrentFitness = 0;
                 generation++;
-                for(int i = 0; i < population-1; i++)
+                for(int i = 0; i < population; i++)
                 {
-                    if(i < population / 20)
+                    if(i <= population / 20)
                     {
                         neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
                     }
-                    else if (i < population / 3)
+                    else if (i >= population - 3)
+                    {
+                        neuralNetworks[i] = neuralNetworks[i].Clone();
+                    }
+                    else
                     {
                         neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
                         neuralNetworks[i].Breed(neuralNetworks[population - 1], neuralNetworks[population - 2]);
                     }
-                    else if(i >= (population - 3))
-                    {
-                        neuralNetworks[i].Mutate(10, 0.2f);
-                    }
-                    else
-                    {
-                        neuralNetworks[i] = neuralNetworks[population - (i % 2) - 1].Clone();
-                        neuralNetworks[i].Mutate((int)(1 / MutateChance), MutationStrength);
-                    }
+                    //else if(i >= (population - 3))
+                    //{
+                    //    neuralNetworks[i].Mutate(10, 0.2f);
+                    //}
+                    //else
+                    //{
+                    //    neuralNetworks[i] = neuralNetworks[population - (i % 2) - 1].Clone();
+                    //    neuralNetworks[i].Mutate((int)(1 / MutateChance), MutationStrength);
+                    //}
                 }
             }
         }

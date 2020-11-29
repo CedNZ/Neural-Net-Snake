@@ -158,7 +158,7 @@ namespace Snake.NeuralNet
                         neuron.Value = 0;
                         for(int np = 0; np < Layers[l - 1].NeuronCount; np++)
                         {
-                            neuron.Value = neuron.Value + Layers[l - 1].Neurons[np].Value * neuron.Dendrites[np].Weight;
+                            neuron.Value += Layers[l - 1].Neurons[np].Value * neuron.Dendrites[np].Weight;
                         }
                         neuron.Value = ActivationFunction(neuron.Value + neuron.Bias);
                     }
