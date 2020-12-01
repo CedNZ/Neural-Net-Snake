@@ -10,7 +10,7 @@ namespace Snake
     {
         static ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
 
-        const int MapWidth = 75;
+        const int MapWidth = 40;
         const int MapHeight = 25;
         static Snake snake;
         static Timer timer;
@@ -19,23 +19,13 @@ namespace Snake
         static bool paused;
         static bool tick;
 
-        static double learningRate = 0.5;
         static int[] layers = new[] { 6, 5, 4, 4 };
 
         static int tickInterval = 10;
 
-        static NeuralNet.NeuralNetwork neuralNet;
-        static NeuralNet.NeuralNetwork[] neuralNetworks;
-        static int generation;
-        static int current;
-        const float MutateChance = 0.10f;
-        const float MutationStrength = 0.05f;
-        const int population = 50;
         static double bestCurrentFitness;
         static double bestOverallFitness;
-
-        static Guid runId;
-        static string outputFile;
+        static NeuralNet.Manager manager;
 
         static string folder = $@"C:\temp\SnakeAI";
         static string foodLocInputBuffer;
@@ -46,20 +36,7 @@ namespace Snake
 
             snake = new Snake(MapWidth, MapHeight);
             food = new Food(MapWidth, MapHeight);
-
-            generation = 0;
-            current = 0;
-
-            neuralNetworks = new NeuralNet.NeuralNetwork[population];
-            for(int i = 0; i < population; i++)
-            {
-                neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
-                neuralNetworks[i].Load(folder, i);
-            }
-
-            runId = Guid.NewGuid();
-
-            outputFile = $@"{folder}\{runId}";
+            manager = new NeuralNet.Manager(layers);
 
             timer = new Timer(Tick, _manualResetEvent, 1000, tickInterval);
             //while(true)
@@ -72,12 +49,6 @@ namespace Snake
 
         private static void Tick(object state)
         {
-            if (current == population)
-            {
-                current = 0;
-            }
-            neuralNet = neuralNetworks[current];
-
             Direction? direction = null;
             if (tick)
             {
@@ -94,7 +65,6 @@ namespace Snake
                 }
                 if(cki.Key == ConsoleKey.R)
                 {
-                    neuralNet = new NeuralNet.NeuralNetwork(learningRate, layers);
                     snake.Create();
                 }
                 if(cki.Key == ConsoleKey.L)
@@ -113,7 +83,7 @@ namespace Snake
                 if(cki.Key == ConsoleKey.K)
                 {
                     snake.Kill();
-                    Next();
+                    manager.Next();
                     return;
                 }
                 if(cki.Key == ConsoleKey.F)
@@ -140,8 +110,8 @@ namespace Snake
                     foodLocInputBuffer += num;
                     if (foodLocInputBuffer.Length == 4)
                     {
-                        var x = int.Parse(foodLocInputBuffer.Substring(0, 2));
-                        var y = int.Parse(foodLocInputBuffer.Substring(2, 2));
+                        var x = Math.Min(int.Parse(foodLocInputBuffer.Substring(0, 2)), MapWidth);
+                        var y = Math.Min(int.Parse(foodLocInputBuffer.Substring(2, 2)), MapHeight);
                         food.Location = (x, y);
                         foodLocInputBuffer = "";
                     }
@@ -158,11 +128,9 @@ namespace Snake
                 1.0/snake.DistanceToEastWall,
                 1.0/snake.DistanceToWestWall };
 
-            var outputs = neuralNet.Run(neuralNetInputs).ToList();
+            nOut = manager.RunCurrent(neuralNetInputs);
 
-            nOut = outputs;            
-
-            var highest = outputs.IndexOf(outputs.Max(Math.Abs));
+            var highest = nOut.Select(Math.Abs).ToList().IndexOf(nOut.Max(Math.Abs));
 
             direction = highest switch
             {
@@ -172,8 +140,6 @@ namespace Snake
                 3 => Direction.West,
                 _ => null,
             };
-
-
 
             if(food.Eaten)
             {
@@ -187,7 +153,7 @@ namespace Snake
             if(snake.Alive)
             {
                 snake.Move(direction, food);
-                neuralNet.Fitness = snake.Fitness;
+                manager.UpdateFitness(snake.Fitness);
                 if (snake.Fitness > bestCurrentFitness)
                 {
                     bestCurrentFitness = snake.Fitness;
@@ -198,52 +164,16 @@ namespace Snake
                 }
             }
             else
-            {                
-                Next();
+            {
+                snake.Create();
+                manager.Next();
+                if (manager.Current == 0)
+                {
+                    bestCurrentFitness = 0;
+                }
             }
 
             Draw();
-        }
-
-        public static void Next()
-        {
-            snake.Create();
-
-            current++;
-            if(current == population)
-            {
-                Array.Sort(neuralNetworks);
-                neuralNetworks.Last().Save(outputFile, generation);
-
-                current = 0;
-                bestCurrentFitness = 0;
-                generation++;
-                for(int i = 0; i < population; i++)
-                {
-                    if(i <= population / 20)
-                    {
-                        neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
-                    }
-                    else if (i >= population - 3)
-                    {
-                        neuralNetworks[i] = neuralNetworks[i].Clone();
-                    }
-                    else
-                    {
-                        neuralNetworks[i] = new NeuralNet.NeuralNetwork(learningRate, layers);
-                        neuralNetworks[i].Breed(neuralNetworks[population - 1], neuralNetworks[population - 2]);
-                    }
-                    //else if(i >= (population - 3))
-                    //{
-                    //    neuralNetworks[i].Mutate(10, 0.2f);
-                    //}
-                    //else
-                    //{
-                    //    neuralNetworks[i] = neuralNetworks[population - (i % 2) - 1].Clone();
-                    //    neuralNetworks[i].Mutate((int)(1 / MutateChance), MutationStrength);
-                    //}
-                }
-            }
         }
 
         public static void Draw()
@@ -265,8 +195,10 @@ namespace Snake
             }
 
             sb.AppendLine($"\nSnake Distances to Walls: N:{snake.DistanceToNorthWall} S:{snake.DistanceToSouthWall} W:{snake.DistanceToWestWall} E:{snake.DistanceToEastWall} F:{snake.DistanceToFood:F2} S:{snake.LookingAtFood} Length: {snake.Length} Head:{snake.Head} Food:{food.Location}");
-            sb.AppendLine($"Generation: {generation}, Current: {current}, Fitness: {neuralNet.Fitness}.\t BestLastFitness: {neuralNetworks.Last().Fitness}, BestCurrentFitness:{bestCurrentFitness}, BestOverallFitness:{bestOverallFitness} ");            //sb.AppendLine($"Snake Head: {snake.Head}");
+            sb.AppendLine($"Generation: {manager.Generation}, Current: {manager.Current}, Fitness: {manager.Fitness}");
+            sb.AppendLine($"BestLastFitness: {manager.BestLastFitness}, BestCurrentFitness:{bestCurrentFitness}, BestOverallFitness:{bestOverallFitness}");            //sb.AppendLine($"Snake Head: {snake.Head}");
             sb.AppendLine($"NN Outputs: {nOut[0]} {nOut[1]} {nOut[2]} {nOut[3]}");
+            sb.AppendLine($"Fresh:{manager.FreshCount} Mutant:{manager.MutantCount} Child:{manager.ChildCount} Clone:{manager.CloneCount}");
 
             Console.Clear();
             Console.Write(sb.ToString());

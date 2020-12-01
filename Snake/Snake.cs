@@ -50,79 +50,65 @@ namespace Snake
 
         public void Move(Direction? direction, Food food)
         {
-            SnakeDirection = direction;
-            
-            var currentHeadX = _snake.First().X;
-            var currentHeadY = _snake.First().Y;
+            lock(this)
+            {
+                SnakeDirection = direction;
 
-            (int X, int Y) newHead = SnakeDirection switch
-            {
-                Direction.North => (currentHeadX, currentHeadY - 1),
-                Direction.South => (currentHeadX, currentHeadY + 1),
-                Direction.East => (currentHeadX + 1, currentHeadY),
-                Direction.West => (currentHeadX - 1, currentHeadY),
-                _ => throw new NotImplementedException()
-            };
+                var currentHeadX = _snake.First().X;
+                var currentHeadY = _snake.First().Y;
 
-            if (newHead.X <= 0 || newHead.X >= _mapWidth
-                || newHead.Y <= 0 || newHead.Y >= _mapHeight
-                || OccupiesSquare(newHead)
-                || _stepsToDieWithoutFood == 0)
-            {
-                Alive = false;
-                return;
-            }
-            
-            if (newHead == food.Location)
-            {
-                food.Eaten = true;
-                Length++;
-                _stepsToDieWithoutFood = _defaultStepsWithoutFood;
-            }
+                (int X, int Y) newHead = SnakeDirection switch
+                {
+                    Direction.North => (currentHeadX, currentHeadY - 1),
+                    Direction.South => (currentHeadX, currentHeadY + 1),
+                    Direction.East => (currentHeadX + 1, currentHeadY),
+                    Direction.West => (currentHeadX - 1, currentHeadY),
+                    _ => throw new NotImplementedException()
+                };
 
-            if (newHead == _lastTail)
-            {
-                _loopCount++;
-                if (_loopCount > 5)
+                if(newHead.X <= 0 || newHead.X >= _mapWidth
+                    || newHead.Y <= 0 || newHead.Y >= _mapHeight
+                    || OccupiesSquare(newHead)
+                    || _stepsToDieWithoutFood == 0)
                 {
                     Alive = false;
                     return;
                 }
-            }
-            _lastTail = _snake.Last();
 
-            _snake.Insert(0, newHead);
-            _snake = _snake.Take(Length).ToList();
-
-            DistanceToFood = -CartesianDistance(newHead, food.Location);
-
-            LookingAtFood = 0;
-            if (newHead.X == food.Location.X || newHead.Y == food.Location.Y)
-            {
-                if (SnakeDirection == Direction.North && newHead.Y > food.Location.Y
-                    || SnakeDirection == Direction.South && newHead.Y < food.Location.Y
-                    || SnakeDirection == Direction.East && newHead.X < food.Location.X
-                    || SnakeDirection == Direction.West && newHead.X > food.Location.X)
+                if(newHead == food.Location)
                 {
-                    LookingAtFood = -1.0;
+                    food.Eaten = true;
+                    Length++;
+                    _stepsToDieWithoutFood = _defaultStepsWithoutFood;
                 }
-                if(SnakeDirection == Direction.North && newHead.Y == food.Location.Y
-                    || SnakeDirection == Direction.South && newHead.Y == food.Location.Y
-                    || SnakeDirection == Direction.East && newHead.X == food.Location.X
-                    || SnakeDirection == Direction.West && newHead.X == food.Location.X)
+
+                if(newHead == _lastTail)
                 {
-                    LookingAtFood = -0.5;
+                    _loopCount++;
+                    if(_loopCount > 5)
+                    {
+                        Alive = false;
+                        return;
+                    }
                 }
+                _lastTail = _snake.Last();
+
+                _snake.Insert(0, newHead);
+                _snake = _snake.Take(Length).ToList();
+
+                DistanceToFood = -CartesianDistance(newHead, food.Location);
+
+                LookingAtFood = AngleToFood(newHead, food.Location);
+
+                DistanceToNorthWall = newHead.Y - _snake.Where(s => s.X == newHead.X && s.Y < newHead.Y).OrderByDescending(s => s.Y).FirstOrDefault().Y;
+                DistanceToSouthWall = FirstOrWall(_snake.Where(s => s.X == newHead.X && s.Y > newHead.Y).OrderBy(s => s.Y)).Y - newHead.Y;
+
+                DistanceToWestWall = newHead.X - _snake.Where(s => s.Y == newHead.Y && s.X < newHead.X).OrderByDescending(s => s.X).FirstOrDefault().X;
+                DistanceToEastWall = FirstOrWall(_snake.Where(s => s.Y == newHead.Y && s.X > newHead.X).OrderBy(s => s.X)).X - newHead.X;
+
+                _steps++;
+                _stepsToDieWithoutFood--;
             }
-
-            DistanceToNorthWall = newHead.Y - _snake.Where(s => s.X == newHead.X && s.Y < newHead.Y).OrderByDescending(s => s.Y).FirstOrDefault().Y ;
-            DistanceToSouthWall = FirstOrWall(_snake.Where(s => s.X == newHead.X && s.Y > newHead.Y).OrderBy(s => s.Y)).Y - newHead.Y;
-
-            DistanceToWestWall = newHead.X - _snake.Where(s => s.Y == newHead.Y && s.X < newHead.X).OrderByDescending(s => s.X).FirstOrDefault().X;
-            DistanceToEastWall = FirstOrWall(_snake.Where(s => s.Y == newHead.Y && s.X > newHead.X).OrderBy(s => s.X)).X - newHead.X;
-
-            _steps++;
-            _stepsToDieWithoutFood--;
         }
 
         public double CartesianDistance((int X, int Y) p, (int X, int Y) q)
@@ -130,7 +116,42 @@ namespace Snake
             return Math.Sqrt(Math.Pow((p.X - q.X), 2) + Math.Pow((p.Y - q.Y), 2));
         }
 
-        public bool OccupiesSquare((int X, int Y) location) 
+        public double AngleToFood((int X, int Y) snakeHead, (int X, int Y) foodLocation)
+        {
+            if(SnakeDirection == Direction.North && foodLocation.Y <= snakeHead.Y
+                || SnakeDirection == Direction.South && foodLocation.Y >= snakeHead.Y
+                || SnakeDirection == Direction.East && foodLocation.X >= snakeHead.X
+                || SnakeDirection == Direction.West && foodLocation.X <= snakeHead.X)
+            {
+                double adjacent = SnakeDirection switch
+                {
+                    Direction.North => snakeHead.Y - foodLocation.Y,
+                    Direction.South => foodLocation.Y - snakeHead.Y,
+                    Direction.East => foodLocation.X - snakeHead.X,
+                    Direction.West => snakeHead.X - foodLocation.X,
+                    _ => double.MaxValue
+                };
+
+                double hypotenuse = CartesianDistance(snakeHead, foodLocation);
+
+                bool leftOfSnake = SnakeDirection switch
+                {
+                    Direction.North => foodLocation.X < snakeHead.X,
+                    Direction.South => foodLocation.X > snakeHead.X,
+                    Direction.East => foodLocation.Y < snakeHead.Y,
+                    Direction.West => foodLocation.Y > snakeHead.Y,
+                    _ => false
+                };
+
+                double angle = 1 - (Math.Acos(adjacent / hypotenuse) / Math.PI);
+
+                return leftOfSnake ? -angle : angle;
+            }
+
+            return 0;
+        }
+
+        public bool OccupiesSquare((int X, int Y) location)
         {
             return OccupiesSquare(location.X, location.Y);
         }
@@ -145,9 +166,9 @@ namespace Snake
             get { return _direction; }
             set
             {
-                if (value != null)
+                if(value != null)
                 {
-                    if (((int)value & 2) != ((int)_direction & 2)) //Bitwise check if they lie on the same axis
+                    if(((int)value & 2) != ((int)_direction & 2)) //Bitwise check if they lie on the same axis
                     {
                         _direction = value.Value;
                     }
@@ -168,7 +189,7 @@ namespace Snake
                 }
                 return p;
             }
-            catch (InvalidOperationException)
+            catch(InvalidOperationException)
             {
                 return (0, 0);
             }

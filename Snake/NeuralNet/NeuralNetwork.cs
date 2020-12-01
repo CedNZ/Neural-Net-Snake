@@ -187,7 +187,7 @@ namespace Snake.NeuralNet
             System.IO.File.AppendAllText($"{file}.csv", sb.AppendLine().ToString().TrimEnd(','));
         }
 
-        public void Load(string folder, int population)
+        public void Load(string folder, int citizen)
         {
             try
             {
@@ -201,7 +201,7 @@ namespace Snake.NeuralNet
                 int i = 0;
                 foreach(var layer in Layers)
                 {
-                    var line = lines.Skip(population).First();
+                    var line = lines.Skip(citizen).First();
                     foreach(var neuron in layer.Neurons)
                     {
                         neuron.Bias = double.Parse(line.Split(',').Skip(2 + i).First());
@@ -265,6 +265,11 @@ namespace Snake.NeuralNet
         public int CompareTo(NeuralNetwork obj)
         {
             return Fitness.CompareTo(obj.Fitness);
+        }
+
+        public override string ToString()
+        {
+            return $"Fitness: {Fitness}";
         }
     }
 }
