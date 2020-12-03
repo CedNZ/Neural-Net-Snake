@@ -208,7 +208,7 @@ namespace Snake.NeuralNet
                         i++;
                         foreach(var dendrite in neuron.Dendrites)
                         {
-                            dendrite.Weight = neuron.Bias = double.Parse(line.Split(',').Skip(2 + i).First());
+                            dendrite.Weight = double.Parse(line.Split(',').Skip(2 + i).First());
                             i++;
                         }
                     }
