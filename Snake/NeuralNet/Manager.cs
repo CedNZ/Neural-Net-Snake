@@ -17,8 +17,9 @@ namespace Snake.NeuralNet
         private string _saveFile;
         private double _learningRate;
         private int[] _layers;
+        private double _bestFitness;
 
-        public Manager(int[] layers, int populationSize = 50, double learningRate = 0.5, bool loadPrevious = false, string loadFrom = @"C:\Temp\SnakeAI\v2")
+        public Manager(int[] layers, int populationSize = 500, double learningRate = 0.5, bool loadPrevious = true, string loadFrom = @"C:\Temp\SnakeAI")
         {
             _populationSize = populationSize;
             _neuralNetworks = new List<NeuralNetwork>(populationSize);
@@ -27,10 +28,11 @@ namespace Snake.NeuralNet
 
             _runId = Guid.NewGuid();
 
-            _saveFile = $@"{loadFrom}\{_runId}.csv";
+            _saveFile = $@"{loadFrom}\{_runId}";
 
             _citizen = 0;
             _generation = 0;
+            _bestFitness = 0;
 
             for (int i = 0; i < populationSize; i++)
             {
@@ -51,10 +53,13 @@ namespace Snake.NeuralNet
         public void UpdateFitness(double fitness)
         {
             _current.Fitness = fitness;
+            if (fitness > _bestFitness)
+                _bestFitness = fitness;
         }
 
         public void Next()
         {
+            Console.WriteLine($"Snake G:{Generation} C:{_citizen} F:{_current.Fitness}\t\tLF:{BestLastFitness}, BF:{_bestFitness}");
             _citizen++;
             if (_citizen == _populationSize)
             {
@@ -65,6 +70,8 @@ namespace Snake.NeuralNet
                 _neuralNetworks.Last().Save(_saveFile, _generation);
 
                 var lastFitness = _neuralNetworks.Last().Fitness;
+
+                Console.WriteLine($"Last Fitness: {lastFitness}");
 
                 _generation++;
 
@@ -90,7 +97,7 @@ namespace Snake.NeuralNet
                     else if (i <= _populationSize * mutantRatio)
                     {
                         _neuralNetworks[i] = _neuralNetworks.Last().Clone();
-                        _neuralNetworks[i].Mutate(0.1f, 0.5f);
+                        _neuralNetworks[i].Mutate(0.1f, 0.25f);
                         MutantCount++;
                     }
                     else if (i >= _populationSize - 3)

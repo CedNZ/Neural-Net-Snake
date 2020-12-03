@@ -10,8 +10,8 @@ namespace Snake
     {
         static ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
 
-        const int MapWidth = 40;
-        const int MapHeight = 25;
+        const int MapWidth = 400;
+        const int MapHeight = 250;
         static Snake snake;
         static Timer timer;
         static Food food;
@@ -38,11 +38,11 @@ namespace Snake
             food = new Food(MapWidth, MapHeight);
             manager = new NeuralNet.Manager(layers);
 
-            timer = new Timer(Tick, _manualResetEvent, 1000, tickInterval);
-            //while(true)
-            //{
-            //    Tick(_manualResetEvent);
-            //}
+            //timer = new Timer(Tick, _manualResetEvent, 1000, tickInterval);
+            while (true)
+            {
+                Tick(_manualResetEvent);
+            }
 
             _manualResetEvent.WaitOne();
         }
@@ -130,18 +130,21 @@ namespace Snake
 
             nOut = manager.RunCurrent(neuralNetInputs);
 
-            var highest = nOut.Select(Math.Abs).ToList().IndexOf(nOut.Max(Math.Abs));
+            Dictionary<Direction, double> nnOutputs = new();
 
-            direction = highest switch
+            nnOutputs.Add(Direction.North, nOut[0]);
+            nnOutputs.Add(Direction.South, nOut[1]);
+            nnOutputs.Add(Direction.East, nOut[2]);
+            nnOutputs.Add(Direction.West, nOut[3]);
+
+            direction = nnOutputs.OrderBy(kv => kv.Value).First().Key;
+
+            if (((int)direction & 2) == ((int)snake.SnakeDirection & 2))
             {
-                0 => Direction.North,
-                1 => Direction.South,
-                2 => Direction.East,
-                3 => Direction.West,
-                _ => null,
-            };
+                direction = nnOutputs.OrderBy(kv => kv.Value).ToList()[1].Key;
+            }
 
-            if(food.Eaten)
+            if (food.Eaten)
             {
                 do
                 {
@@ -173,7 +176,7 @@ namespace Snake
                 }
             }
 
-            Draw();
+            //Draw();
         }
 
         public static void Draw()

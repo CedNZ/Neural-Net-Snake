@@ -12,7 +12,7 @@ namespace Snake
         private readonly int _mapWidth, _mapHeight;
         private int _steps;
         private int _stepsToDieWithoutFood;
-        private int _defaultStepsWithoutFood = 2500;
+        private int _defaultStepsWithoutFood = 25000;
         private int _loopCount;
         private (int X, int Y) _lastTail;
 
