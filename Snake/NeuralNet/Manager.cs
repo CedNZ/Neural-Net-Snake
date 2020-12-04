@@ -19,7 +19,7 @@ namespace Snake.NeuralNet
         private int[] _layers;
         private double _bestFitness;
 
-        public Manager(int[] layers, int populationSize = 500, double learningRate = 0.5, bool loadPrevious = true, string loadFrom = @"C:\Temp\SnakeAI")
+        public Manager(int[] layers, int populationSize = 500, double learningRate = 0.5, bool loadPrevious = false, string loadFrom = @"C:\Temp\SnakeAI")
         {
             _populationSize = populationSize;
             _neuralNetworks = new List<NeuralNetwork>(populationSize);
@@ -122,6 +122,7 @@ namespace Snake.NeuralNet
         public int Current => _citizen;
         public double Fitness => _current.Fitness;
         public double BestLastFitness => _neuralNetworks.Last().Fitness;
+        public double BestFitness => _bestFitness;
 
         public int MutantCount;
         public int FreshCount;

@@ -35,6 +35,7 @@ namespace Snake
             Alive = true;
             _steps = 0;
             _lastTail = (0, 0);
+            BonusPoints = 0;
             _stepsToDieWithoutFood = _defaultStepsWithoutFood;
         }
 
@@ -79,6 +80,12 @@ namespace Snake
                 {
                     food.Eaten = true;
                     Length++;
+
+                    if (_stepsToDieWithoutFood > _defaultStepsWithoutFood / 2)
+                    {
+                        BonusPoints++;
+                    }
+
                     _stepsToDieWithoutFood = _defaultStepsWithoutFood;
                 }
 
@@ -203,7 +210,8 @@ namespace Snake
 
         public int Length { get; private set; }
         public bool Alive { get; private set; }
-        public double Fitness => (Length * 1000) + ((double)_steps / 1000);
+        public int BonusPoints;
+        public double Fitness => (Length * 1000) + (BonusPoints * 100) + ((double)_steps / 1000);
 
         public double DistanceToNorthWall { get; private set; }
         public double DistanceToSouthWall { get; private set; }
