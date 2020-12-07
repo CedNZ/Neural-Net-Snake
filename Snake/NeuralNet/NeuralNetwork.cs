@@ -187,14 +187,27 @@ namespace Snake.NeuralNet
             System.IO.File.AppendAllText($"{file}.csv", sb.AppendLine().ToString().TrimEnd(','));
         }
 
-        public void Load(string folder, int citizen)
+        public void Load(string folder, int citizen, string oldFile = "")
         {
             try
             {
-                DirectoryInfo directoryInfo = new DirectoryInfo(folder);
-                var fileName = directoryInfo.GetFiles("*.csv").OrderByDescending(x => x.LastWriteTime).First().FullName;
+                string fileName = "";
+                if(!string.IsNullOrEmpty(oldFile))
+                {
+                    fileName = oldFile;
+                }
+                else
+                {
+                    DirectoryInfo directoryInfo = new DirectoryInfo(folder);
+                    fileName = directoryInfo.GetFiles("*.csv").OrderByDescending(x => x.LastWriteTime).First().FullName;
+                }
 
                 var lines = File.ReadAllLines(fileName).ToList();
+
+                if (citizen >= lines.Count())
+                {
+                    return;
+                }
 
                 lines = lines.OrderByDescending(l => double.Parse(l.Split(',')[1])).ToList();
 
