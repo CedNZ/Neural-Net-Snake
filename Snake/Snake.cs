@@ -12,9 +12,10 @@ namespace Snake
         private readonly int _mapWidth, _mapHeight;
         private int _steps;
         private int _stepsToDieWithoutFood;
-        private int _defaultStepsWithoutFood = 25000;
+        private int _defaultStepsWithoutFood = 1000;
         private int _loopCount;
         private (int X, int Y) _lastTail;
+        private long _bonusPoints;
 
         public Snake(int mapWidth, int mapHeight)
         {
@@ -35,8 +36,8 @@ namespace Snake
             Alive = true;
             _steps = 0;
             _lastTail = (0, 0);
-            BonusPoints = 0;
             _stepsToDieWithoutFood = _defaultStepsWithoutFood;
+            _bonusPoints = 0;
         }
 
         public void Lengthen()
@@ -81,10 +82,7 @@ namespace Snake
                     food.Eaten = true;
                     Length++;
 
-                    if (_stepsToDieWithoutFood > _defaultStepsWithoutFood / 2)
-                    {
-                        BonusPoints++;
-                    }
+                    _bonusPoints = _stepsToDieWithoutFood / 10;
 
                     _stepsToDieWithoutFood = _defaultStepsWithoutFood;
                 }
@@ -210,8 +208,7 @@ namespace Snake
 
         public int Length { get; private set; }
         public bool Alive { get; private set; }
-        public int BonusPoints;
-        public double Fitness => (Length * 1000) + (BonusPoints * 100) + ((double)_steps / 1000);
+        public double Fitness => (Length * 1000) + _bonusPoints + (Length > 10 ? 0 : (double)_steps / 1000);
 
         public double DistanceToNorthWall { get; private set; }
         public double DistanceToSouthWall { get; private set; }
