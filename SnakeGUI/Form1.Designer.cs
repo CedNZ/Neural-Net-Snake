@@ -31,7 +31,7 @@ namespace SnakeGUI
         {
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1050, 500);
+            this.ClientSize = new System.Drawing.Size(Snake.Program.MapWidth * (BlockSize + 1), Snake.Program.MapHeight * (BlockSize));
             this.Text = "Ced's Neural Snakes";
             this.Paint += Game_Paint;
             this.BackColor = System.Drawing.Color.AliceBlue;

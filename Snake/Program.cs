@@ -6,12 +6,12 @@ using System.Threading;
 
 namespace Snake
 {
-    class Program
+    public class Program
     {
         static ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
 
-        const int MapWidth = 400;
-        const int MapHeight = 250;
+        public const int MapWidth = 200;
+        public const int MapHeight = 100;
         static Snake snake;
         static Timer timer;
         static Food food;

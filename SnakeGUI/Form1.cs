@@ -11,9 +11,9 @@ namespace SnakeGUI
     public partial class Form1 : Form
     {
         private Timer timer;
-        const int MapHeight = 125;
-        const int MapWidth = 200;
-        const int blockSize = 4;
+        const int MapHeight = Snake.Program.MapHeight;
+        const int MapWidth = Snake.Program.MapWidth;
+        public const int BlockSize = 4;
         static int[] layers = new[] { 6, 5, 4, 4 };
         private int snakeCount;
         private int gameCount = 20;
