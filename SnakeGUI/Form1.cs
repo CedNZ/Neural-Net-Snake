@@ -11,8 +11,9 @@ namespace SnakeGUI
     public partial class Form1 : Form
     {
         private Timer timer;
-        const int MapHeight = 250;
-        const int MapWidth = 400;
+        const int MapHeight = 125;
+        const int MapWidth = 200;
+        const int blockSize = 4;
         static int[] layers = new[] { 6, 5, 4, 4 };
         private int snakeCount;
         private int gameCount = 20;
@@ -130,17 +131,17 @@ namespace SnakeGUI
         private void Game_Paint(object sender, PaintEventArgs e)
         {
             int i = 0;
-            foreach(var game in games)
+            foreach(var game in games.OrderByDescending(g => g.manager.BestFitness))
             {
                 i++;
                 var snake = game.snake;
                 var food = game.food;
-                e.Graphics.DrawString($"G: {game.manager.Generation} C: {game.manager.Current} Length: {snake.SnakeBody.Count() - 3} B:{game.manager.BestFitness}", DefaultFont, game.colour, 810, ((((MapHeight * 2) / gameCount) - 1) * i));
+                e.Graphics.DrawString($"G: {game.manager.Generation} C: {game.manager.Current} L: {snake.SnakeBody.Count() - 3} B:{game.manager.BestFitness}", DefaultFont, game.colour, 810, ((((MapHeight * blockSize) / gameCount) - 1) * i));
                 foreach(var snakePart in snake.SnakeBody)
                 {
-                    e.Graphics.FillRectangle(game.colour, snakePart.X * 2, snakePart.Y * 2, 2, 2);
+                    e.Graphics.FillRectangle(game.colour, snakePart.X * blockSize, snakePart.Y * blockSize, blockSize, blockSize);
                 }
-                e.Graphics.FillRectangle(game.colour, food.Location.X * 2, food.Location.Y * 2, 2, 2);
+                e.Graphics.FillRectangle(game.colour, food.Location.X * blockSize, food.Location.Y * blockSize, blockSize, blockSize);
             }
         }
 
