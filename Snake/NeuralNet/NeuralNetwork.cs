@@ -83,17 +83,34 @@ namespace Snake.NeuralNet
             //return x / (1 + Math.Exp(-x));
         }
 
-        public void Mutate(float chance, float val) //simple mutatution algorithm, taken from: https://github.com/kipgparker/MutationNetwork/blob/master/Mutation%20Neural%20Network/Assets/NeuralNetwork.cs
+        public void Mutate(float chance, float mutationStrength)
         {
+            int strongMutationFactor = 10;
             foreach(var layer in Layers)
             {
                 foreach(var neuron in layer.Neurons)
                 {
-                    neuron.Bias = new CryptoRandom().RandomValue > chance ? neuron.Bias += new CryptoRandom().RandomBetween(-val, val) : neuron.Bias;
+                    double randomMutationChance = new CryptoRandom().RandomValue;
+                    if(randomMutationChance < chance)
+                    {
+                        neuron.Bias += new CryptoRandom().RandomBetween(-mutationStrength, mutationStrength);
+                    }
+                    if(randomMutationChance < chance / strongMutationFactor)
+                    {
+                        neuron.Bias += new CryptoRandom().RandomBetween(-(mutationStrength * strongMutationFactor), (mutationStrength * strongMutationFactor));
+                    }
 
                     foreach(var dendrite in neuron.Dendrites)
                     {
-                        dendrite.Weight = new CryptoRandom().RandomValue > chance ? dendrite.Weight += new CryptoRandom().RandomBetween(-val, val) : dendrite.Weight;
+                        double randomMutationChanceDendrite = new CryptoRandom().RandomValue;
+                        if(randomMutationChanceDendrite < chance)
+                        {
+                            dendrite.Weight += new CryptoRandom().RandomBetween(-mutationStrength, mutationStrength);
+                        }
+                        if(randomMutationChanceDendrite < chance / strongMutationFactor)
+                        {
+                            dendrite.Weight += new CryptoRandom().RandomBetween(-(mutationStrength * strongMutationFactor), (mutationStrength * strongMutationFactor));
+                        }
                     }
                 }
             }
@@ -184,7 +201,17 @@ namespace Snake.NeuralNet
                     }
                 }
             }
-            System.IO.File.AppendAllText($"{file}.csv", sb.AppendLine().ToString().TrimEnd(','));
+            if(!File.Exists($"{file}.csv"))
+            {
+                using(var stream = File.CreateText($"{file}.csv"))
+                {
+                    stream.Write(sb.AppendLine().ToString().TrimEnd(','));
+                }                    
+            }
+            else
+            {
+                File.AppendAllText($"{file}.csv", sb.AppendLine().ToString().TrimEnd(','));
+            }
         }
 
         public void Load(string folder, int citizen, string oldFile = "")

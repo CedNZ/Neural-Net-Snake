@@ -16,7 +16,7 @@ namespace SnakeGUI
         public const int BlockSize = 4;
         static int[] layers = new[] { 6, 5, 4, 4 };
         private int snakeCount;
-        private int gameCount = 20;
+        private int gameCount = 10;
         List<(Snake.NeuralNet.Manager manager, Snake.Snake snake, Food food, Brush colour)> games;
 
         public Form1()
@@ -50,8 +50,13 @@ namespace SnakeGUI
                     _ => (Brushes.Black, Guid.Parse("90d2380c-cff6-456d-8095-a67be615444e")),
                 };
 
+                if (gameCount == 1)
+                {
+                    runId = Guid.NewGuid();
+                }
+
                 games.Add((
-                    new Snake.NeuralNet.Manager(layers: layers, populationSize: 100, loadPrevious: true, runId: runId),
+                    new Snake.NeuralNet.Manager(layers: layers, populationSize: 100, loadPrevious: true, runId: runId, loadFrom: @"C:\Temp\Snake2021"),
                     new Snake.Snake(MapWidth, MapHeight),
                     new Food(MapWidth, MapHeight),
                     brush));
@@ -79,8 +84,8 @@ namespace SnakeGUI
                 Snake.Food food = game.food;
                 Direction direction;
 
-                List<double> neuralNetInputs = new List<double> { 1.0/snake.DistanceToFood,
-                snake.LookingAtFood,
+                List<double> neuralNetInputs = new List<double> { 1.0/snake.DistanceToFoodX,
+                snake.DistanceToFoodY,
                 1.0/snake.DistanceToNorthWall,
                 1.0/snake.DistanceToSouthWall,
                 1.0/snake.DistanceToEastWall,

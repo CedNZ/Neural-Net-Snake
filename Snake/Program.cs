@@ -27,7 +27,7 @@ namespace Snake
         static double bestOverallFitness;
         static NeuralNet.Manager manager;
 
-        static string folder = $@"C:\temp\SnakeAI";
+        static string folder = $@"C:\temp\SnakeAI\v3";
         static string foodLocInputBuffer;
 
         public static void Main(string[] args)
@@ -121,8 +121,8 @@ namespace Snake
             if(paused) return;
 
 
-            List<double> neuralNetInputs = new List<double> { 1.0/snake.DistanceToFood,
-                snake.LookingAtFood,
+            List<double> neuralNetInputs = new List<double> { 1.0/snake.DistanceToFoodX,
+                1.0/snake.DistanceToFoodY,
                 1.0/snake.DistanceToNorthWall,
                 1.0/snake.DistanceToSouthWall,
                 1.0/snake.DistanceToEastWall,

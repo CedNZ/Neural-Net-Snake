@@ -12,7 +12,7 @@ namespace Snake
         private readonly int _mapWidth, _mapHeight;
         private int _steps;
         private int _stepsToDieWithoutFood;
-        private int _defaultStepsWithoutFood = 1000;
+        private int _defaultStepsWithoutFood = 2500;
         private int _loopCount;
         private (int X, int Y) _lastTail;
         private long _bonusPoints;
@@ -102,6 +102,9 @@ namespace Snake
                 _snake = _snake.Take(Length).ToList();
 
                 DistanceToFood = -CartesianDistance(newHead, food.Location);
+
+                DistanceToFoodX = newHead.X > food.Location.X ? -(newHead.X - food.Location.X) : food.Location.X - newHead.X;
+                DistanceToFoodY = newHead.Y > food.Location.Y ? -(newHead.Y - food.Location.Y) : food.Location.Y - newHead.Y;
 
                 LookingAtFood = AngleToFood(newHead, food.Location);
 
@@ -215,6 +218,11 @@ namespace Snake
         public double DistanceToWestWall { get; private set; }
         public double DistanceToEastWall { get; private set; }
         public double DistanceToFood { get; private set; }
+
+        public double DistanceToFoodX { get; private set; }
+        public double DistanceToFoodY { get; private set; }
+
+
         public double LookingAtFood { get; private set; }
     }
 

@@ -11,7 +11,7 @@ namespace Snake.NeuralNet
         public Dendrite()
         {
             CryptoRandom cryptoRandom = new CryptoRandom();
-            Weight = cryptoRandom.RandomValue;
+            Weight = cryptoRandom.RandomBetween(-1.0f, 1.0f);
         }
     }
 }

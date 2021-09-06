@@ -17,7 +17,7 @@ namespace Snake.NeuralNet
         public Neuron()
         {
             CryptoRandom cryptoRandom = new CryptoRandom();
-            Bias = cryptoRandom.RandomValue;
+            Bias = cryptoRandom.RandomBetween(-1.0f, 1.0f);
 
             Dendrites = new List<Dendrite>();
         }
