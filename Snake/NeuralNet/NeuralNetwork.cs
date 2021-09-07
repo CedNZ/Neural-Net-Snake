@@ -16,8 +16,9 @@ namespace Snake.NeuralNet
         public int LayerCount => Layers.Count();
 
         private int[] _layers;
+        private Func<double, double> _activationFunc;
 
-        public NeuralNetwork(double learningRate, int[] layers)
+        public NeuralNetwork(double learningRate, int[] layers, Func<double, double> activationFunction = null)
         {
             if (layers.Length < 2)
             {
@@ -27,6 +28,8 @@ namespace Snake.NeuralNet
             _layers = layers;
             LearningRate = learningRate;
             Layers = new List<Layer>();
+
+            _activationFunc = activationFunction ?? ActivationFunctions.TanH;
 
             for (int l = 0; l < layers.Length; l++)
             {
@@ -79,7 +82,8 @@ namespace Snake.NeuralNet
 
         public double ActivationFunction(double x)
         {
-            return Math.Tanh(x);
+            return _activationFunc(x);
+            //return Math.Tanh(x);
             //return x / (1 + Math.Exp(-x));
         }
 

@@ -19,7 +19,7 @@ namespace Snake.NeuralNet
         private int[] _layers;
         private double _bestFitness;
 
-        public Manager(int[] layers, int populationSize = 500, double learningRate = 0.5, bool loadPrevious = false, string loadFrom = @"C:\Temp\SnakeAI", Guid? runId = null)
+        public Manager(int[] layers, int populationSize = 500, double learningRate = 0.5, bool loadPrevious = false, string loadFrom = @"C:\Temp\SnakeAI", Guid? runId = null, Func<double, double> activationFunction = null)
         {
             _populationSize = populationSize;
             _neuralNetworks = new List<NeuralNetwork>(populationSize);
@@ -34,9 +34,11 @@ namespace Snake.NeuralNet
             _generation = 0;
             _bestFitness = 0;
 
+            activationFunction ??= ActivationFunctions.TanH;
+
             for (int i = 0; i < populationSize; i++)
             {
-                _neuralNetworks.Add(new NeuralNetwork(learningRate, layers));
+                _neuralNetworks.Add(new NeuralNetwork(learningRate, layers, activationFunction));
                 if(loadPrevious)
                 {
                     _neuralNetworks[i].Load(loadFrom, i, _saveFile + ".csv");
