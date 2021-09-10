@@ -11,7 +11,7 @@ namespace Snake
         static ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
 
         public const int MapWidth = 200;
-        public const int MapHeight = 100;
+        public const int MapHeight = 200;
         static Snake snake;
         static Timer timer;
         static Food food;

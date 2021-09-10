@@ -35,6 +35,8 @@ namespace SnakeGUI
             this.Text = "Ced's Neural Snakes";
             this.Paint += Game_Paint;
             this.BackColor = System.Drawing.Color.AliceBlue;
+            this.KeyPreview = true;
+            this.KeyPress += KeyPress_Handler;
         }
 
         #endregion

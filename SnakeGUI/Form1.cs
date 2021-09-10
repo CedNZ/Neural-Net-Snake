@@ -22,6 +22,7 @@ namespace SnakeGUI
 
         private readonly BufferedGraphics bufferedGraphics;
         private readonly BufferedGraphicsContext context;
+        private bool clearBuffer = true;
 
         public Form1()
         {
@@ -92,12 +93,15 @@ namespace SnakeGUI
                 Food food = game.food;
                 Direction direction;
 
-                List<double> neuralNetInputs = new List<double> { 1.0/snake.DistanceToFoodX,
-                snake.DistanceToFoodY,
-                1.0/snake.DistanceToNorthWall,
-                1.0/snake.DistanceToSouthWall,
-                1.0/snake.DistanceToEastWall,
-                1.0/snake.DistanceToWestWall };
+                List<double> neuralNetInputs = new List<double> 
+                { 
+                    1.0/snake.DistanceToFoodX,
+                    1.0/snake.DistanceToFoodY,
+                    1.0/snake.DistanceToNorthWall,
+                    1.0/snake.DistanceToSouthWall,
+                    1.0/snake.DistanceToEastWall,
+                    1.0/snake.DistanceToWestWall 
+                };
 
                 var nOut = manager.RunCurrent(neuralNetInputs).Select(Math.Abs).ToList();
 
@@ -110,10 +114,10 @@ namespace SnakeGUI
 
                 direction = nnOutputs.OrderBy(kv => kv.Value).First().Key;
 
-                if(((int)direction & 2) == ((int)snake.SnakeDirection & 2))
-                {
-                    direction = nnOutputs.OrderBy(kv => kv.Value).ToList()[1].Key;
-                }
+                //if(((int)direction & 2) == ((int)snake.SnakeDirection & 2))
+                //{
+                //    direction = nnOutputs.OrderBy(kv => kv.Value).ToList()[1].Key;
+                //}
 
                 if(food.Eaten)
                 {
@@ -141,7 +145,10 @@ namespace SnakeGUI
 
         private void DrawToBuffer(Graphics g)
         {
-            g.FillRectangle(Brushes.AliceBlue, 0, 0, Width, Height);
+            if (clearBuffer)
+            {
+                g.FillRectangle(Brushes.AliceBlue, 0, 0, Width, Height);
+            }
             int i = 0;
             foreach (var game in games.OrderByDescending(g => g.manager.BestFitness))
             {
@@ -162,6 +169,14 @@ namespace SnakeGUI
         private void Game_Paint(object sender, PaintEventArgs e)
         {
             bufferedGraphics.Render(e.Graphics);
+        }
+
+        private void KeyPress_Handler(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 't')
+            {
+                clearBuffer = !clearBuffer;
+            }
         }
 
     }
