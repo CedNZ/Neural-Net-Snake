@@ -23,7 +23,7 @@ namespace SnakeGUI
             };
 
             resultsDataGrid.Columns.Add(new DataGridCellClasses.DataGridViewDefaultColumn("#"));
-            resultsDataGrid.Columns.Add(new DataGridCellClasses.DataGridViewDefaultColumn(nameof(Results.Name)));
+            resultsDataGrid.Columns.Add(new DataGridCellClasses.HighlightableDataGridViewColumn(nameof(Results.Name)));
             resultsDataGrid.Columns.Add(new DataGridCellClasses.DataGridViewDefaultColumn(nameof(Results.Score)));
             resultsDataGrid.Columns.Add(new DataGridCellClasses.DataGridViewDefaultColumn(nameof(Results.Length)));
             resultsDataGrid.Columns.Add(new DataGridCellClasses.HighlightableDataGridViewColumn(nameof(Results.Layers)));
