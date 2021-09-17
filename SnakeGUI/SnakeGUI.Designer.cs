@@ -1,7 +1,7 @@
 ﻿
 namespace SnakeGUI
 {
-    partial class Form1
+    partial class SnakeGUI
     {
         /// <summary>
         ///  Required designer variable.
