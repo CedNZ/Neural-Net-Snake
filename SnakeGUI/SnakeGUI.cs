@@ -17,13 +17,13 @@ namespace SnakeGUI
         const int MapWidth = Snake.Program.MapWidth;
         public const int BlockSize = 4;
 
-        List<(Manager manager, Snake.Snake snake, Food food, Brush colour)> _games;
+        List<GameWrapper> _games;
 
         private readonly BufferedGraphics bufferedGraphics;
         private readonly BufferedGraphicsContext context;
         private bool clearBuffer = true;
 
-        public SnakeGUI(List<(Manager manager, Snake.Snake snake, Food food, Brush colour)> games)
+        public SnakeGUI(List<GameWrapper> games)
         {
             InitializeComponent();
 
@@ -61,17 +61,17 @@ namespace SnakeGUI
 
             int i = 0;
             int gameCount = _games.Count();
-            foreach (var game in _games.OrderByDescending(g => g.manager.BestFitness))
+            foreach (var game in _games.OrderByDescending(g => g.Manager.BestFitness))
             {
-                var snake = game.snake;
-                var food = game.food;
-                var brushName = ((SolidBrush)game.colour).Color.Name;
-                g.DrawString($"G: {game.manager.Generation} C: {game.manager.Current} L: {snake.SnakeBody.Count() - 3} B:{game.manager.BestFitness}  {brushName}", DefaultFont, game.colour, 810, ((((MapHeight * (BlockSize)) / gameCount) - 1) * i++));
+                var snake = game.Snake;
+                var food = game.Food;
+                var brushName = ((SolidBrush)game.Colour).Color.Name;
+                g.DrawString($"G: {game.Manager.Generation} C: {game.Manager.Current} L: {snake.SnakeBody.Count() - 3} B:{game.Manager.BestFitness}  {brushName}", DefaultFont, game.Colour, 810, ((((MapHeight * (BlockSize)) / gameCount) - 1) * i++));
                 foreach (var snakePart in snake.SnakeBody)
                 {
-                    g.FillRectangle(game.colour, snakePart.X * BlockSize, snakePart.Y * BlockSize, BlockSize, BlockSize);
+                    g.FillRectangle(game.Colour, snakePart.X * BlockSize, snakePart.Y * BlockSize, BlockSize, BlockSize);
                 }
-                g.FillRectangle(game.colour, food.Location.X * BlockSize, food.Location.Y * BlockSize, BlockSize, BlockSize);
+                g.FillRectangle(game.Colour, food.Location.X * BlockSize, food.Location.Y * BlockSize, BlockSize, BlockSize);
             }
         }
 

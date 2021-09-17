@@ -14,10 +14,10 @@ namespace SnakeGUI
     public class GameRunner : ApplicationContext
     {
         private int _gameCount = 60;
-        private List<(Manager manager, Snake.Snake snake, Food food, Brush colour)> _games;
+        private List<GameWrapper> _games;
         private int _refreshCounter = 10;
 
-        public List<(Manager manager, Snake.Snake snake, Food food, Brush colour)> Games => _games;
+        public List<GameWrapper> Games => _games;
 
         const int MapHeight = Snake.Program.MapHeight;
         const int MapWidth = Snake.Program.MapWidth;
@@ -26,17 +26,7 @@ namespace SnakeGUI
         {
             Application.ApplicationExit += new EventHandler(OnApplicationExit);
 
-            _games = new List<(Manager manager, Snake.Snake snake, Food food, Brush colour)>(_gameCount);
-            
-            _resultsTable = new DataTable();
-            _resultsTable.Columns.Add("#", typeof(int));
-            _resultsTable.Columns.Add(nameof(Results.Name), typeof(string));
-            _resultsTable.Columns.Add(nameof(Results.Score), typeof(string));
-            _resultsTable.Columns.Add(nameof(Results.Length), typeof(int));
-            _resultsTable.Columns.Add(nameof(Results.Layers), typeof(string));
-            _resultsTable.Columns.Add(nameof(Results.ActivationFunction), typeof(string));
-            _resultsTable.Columns.Add(nameof(Results.Generation), typeof(int));
-            _resultsTable.Columns.Add(nameof(Results.Citizen), typeof(int));
+            _games = new List<GameWrapper>(_gameCount);
 
             for (int i = 0; i < _gameCount; i++)
             {
@@ -69,7 +59,7 @@ namespace SnakeGUI
                     runId = Guid.NewGuid();
                 }
 
-                Games.Add((
+                Games.Add(new GameWrapper(
                     new Manager(layers: layers, populationSize: 100, loadPrevious: false, runId: null, loadFrom: @"C:\Temp\SnakeResults", activationFunction: activationFunc),
                     new Snake.Snake(MapWidth, MapHeight),
                     new Food(MapWidth, MapHeight),
@@ -98,9 +88,9 @@ namespace SnakeGUI
         {
             foreach (var game in Games)
             {
-                Manager manager = game.manager;
-                Snake.Snake snake = game.snake;
-                Food food = game.food;
+                Manager manager = game.Manager;
+                Snake.Snake snake = game.Snake;
+                Food food = game.Food;
                 Direction direction;
 
                 List<double> neuralNetInputs = new List<double>
@@ -163,20 +153,20 @@ namespace SnakeGUI
             _resultsTable.Clear();
 
             int i = 0;
-            foreach (var game in Games.OrderByDescending(g => g.manager.BestFitness))
+            foreach (var game in Games.OrderByDescending(g => g.Manager.BestFitness))
             {
                 var row = _resultsTable.NewRow();
 
-                var brushName = ((SolidBrush)game.colour).Color.Name;
+                var brushName = ((SolidBrush)game.Colour).Color.Name;
 
                 row["#"] = ++i;
                 row[nameof(Results.Name)] = brushName;
-                row[nameof(Results.Score)] = game.manager.BestFitness.ToString("N");
-                row[nameof(Results.Length)] = game.snake.SnakeBody.Count();
-                row[nameof(Results.Layers)] = game.manager.Layers;
-                row[nameof(Results.ActivationFunction)] = game.manager.ActivationFunc;
-                row[nameof(Results.Generation)] = game.manager.Generation;
-                row[nameof(Results.Citizen)] = game.manager.Current;
+                row[nameof(Results.Score)] = game.Manager.BestFitness.ToString("N");
+                row[nameof(Results.Length)] = game.Snake.SnakeBody.Count();
+                row[nameof(Results.Layers)] = game.Manager.Layers;
+                row[nameof(Results.ActivationFunction)] = game.Manager.ActivationFunc;
+                row[nameof(Results.Generation)] = game.Manager.Generation;
+                row[nameof(Results.Citizen)] = game.Manager.Current;
 
                 _resultsTable.Rows.Add(row);
             }
@@ -211,5 +201,33 @@ namespace SnakeGUI
                 _snakeForm = value;
             }
         }
+    }
+
+    public class GameWrapper
+    {
+        public GameWrapper(Manager manager, Snake.Snake snake, Food food, Brush colour)
+        {
+            Manager = manager;
+            Snake = snake;
+            Food = food;
+            Colour = colour;
+            DrawGame = false;
+        }
+
+        private Manager _manager;
+        public Manager Manager { get => _manager; set => _manager = value; }
+
+        private Snake.Snake _snake;
+        public Snake.Snake Snake { get => _snake; set => _snake = value; }
+
+        private Food _food;
+        public Food Food { get => _food; set => _food = value; }
+
+        private Brush _colour;
+        public Brush Colour { get => _colour; set => _colour = value; }
+
+
+        private bool _drawGame;
+        public bool DrawGame { get => _drawGame; set => _drawGame = value; }
     }
 }
