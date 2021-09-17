@@ -35,6 +35,20 @@ namespace Snake.NeuralNet
             _bestFitness = 0;
 
             activationFunction ??= ActivationFunctions.TanH;
+            
+            if (activationFunction == ActivationFunctions.TanH)
+            {
+                ActivationFunc = "TanH";
+            }
+            else if (activationFunction == ActivationFunctions.ReLU)
+            {
+                ActivationFunc = "ReLU";
+            }
+            else if (activationFunction == ActivationFunctions.Softplus)
+            {
+                ActivationFunc = "Softplus";
+            }
+            Layers = string.Join(", ", layers);
 
             for (int i = 0; i < populationSize; i++)
             {
@@ -118,6 +132,9 @@ namespace Snake.NeuralNet
             }
             _current = _neuralNetworks[_citizen];
         }
+
+        public string ActivationFunc;
+        public string Layers;
 
         public List<NeuralNetwork> NeuralNetworks => _neuralNetworks;
         public int Generation => _generation;
