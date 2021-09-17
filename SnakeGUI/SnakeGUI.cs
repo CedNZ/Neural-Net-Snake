@@ -61,7 +61,7 @@ namespace SnakeGUI
 
             int i = 0;
             int gameCount = _games.Count();
-            foreach (var game in _games.OrderByDescending(g => g.Manager.BestFitness))
+            foreach (var game in _games.Where(x => x.DrawGame).OrderByDescending(g => g.Manager.BestFitness))
             {
                 var snake = game.Snake;
                 var food = game.Food;

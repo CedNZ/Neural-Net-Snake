@@ -15,7 +15,6 @@ namespace SnakeGUI
     {
         private int _gameCount = 60;
         private List<GameWrapper> _games;
-        private int _refreshCounter = 10;
 
         public List<GameWrapper> Games => _games;
 
@@ -140,39 +139,15 @@ namespace SnakeGUI
                 }
             }
 
-            _refreshCounter--;
-            if (_refreshCounter == 0)
+            if (Games.Any(x => x.DrawGame))
             {
-                _refreshCounter = 10;
-                RefreshResults();
+                SnakeForm.Show();
+            }
+            else
+            {
+                SnakeForm.Hide();
             }
         }
-
-        private void RefreshResults()
-        {
-            _resultsTable.Clear();
-
-            int i = 0;
-            foreach (var game in Games.OrderByDescending(g => g.Manager.BestFitness))
-            {
-                var row = _resultsTable.NewRow();
-
-                var brushName = ((SolidBrush)game.Colour).Color.Name;
-
-                row["#"] = ++i;
-                row[nameof(Results.Name)] = brushName;
-                row[nameof(Results.Score)] = game.Manager.BestFitness.ToString("N");
-                row[nameof(Results.Length)] = game.Snake.SnakeBody.Count();
-                row[nameof(Results.Layers)] = game.Manager.Layers;
-                row[nameof(Results.ActivationFunction)] = game.Manager.ActivationFunc;
-                row[nameof(Results.Generation)] = game.Manager.Generation;
-                row[nameof(Results.Citizen)] = game.Manager.Current;
-
-                _resultsTable.Rows.Add(row);
-            }
-        }
-
-        private DataTable _resultsTable;
 
         private ResultsForm _resultsForm;
 
@@ -180,7 +155,7 @@ namespace SnakeGUI
         {
             get
             {
-                return _resultsForm ??= new ResultsForm(_resultsTable);
+                return _resultsForm ??= new ResultsForm(Games);
             }
             set
             {

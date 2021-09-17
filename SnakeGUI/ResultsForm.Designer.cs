@@ -42,6 +42,8 @@ namespace SnakeGUI
             this.resultsDataGrid.RowTemplate.Height = 25;
             this.resultsDataGrid.Size = new System.Drawing.Size(800, 450);
             this.resultsDataGrid.TabIndex = 0;
+            this.resultsDataGrid.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.resultsDataGrid_CellContentClick);
+            this.resultsDataGrid.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.resultsDataGrid_CellValueChanged);
             // 
             // ResultsForm
             // 

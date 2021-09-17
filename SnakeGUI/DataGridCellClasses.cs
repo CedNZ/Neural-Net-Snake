@@ -40,6 +40,8 @@ namespace SnakeGUI
             }
         }
 
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         public class HighlightableDataGridViewCell : DataGridViewTextBoxCell
         {
             protected override void OnMouseEnter(int rowIndex)
@@ -86,6 +88,43 @@ namespace SnakeGUI
             }
         }
 
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public class CheckBoxDataGridViewCell : DataGridViewCheckBoxCell
+        {
+            public CheckBoxDataGridViewCell()
+            {
+                FalseValue = false;
+                TrueValue = true;
+            }
+        }
+
+
+        public class CheckboxDataGridViewColumn : DataGridViewColumn
+        {
+            public CheckboxDataGridViewColumn(string name)
+            {
+                Name = name;
+                DataPropertyName = name;
+                CellTemplate = new CheckBoxDataGridViewCell();
+            }
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+
+        public class HiddenDataGridViewColumn : DataGridViewColumn
+        {
+            public HiddenDataGridViewColumn(string name)
+            {
+                Name = name;
+                DataPropertyName = name;
+                CellTemplate = new DataGridViewTextBoxCell();
+                Visible = false;
+            }
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public class DataGridViewDefaultColumn : DataGridViewColumn
         {

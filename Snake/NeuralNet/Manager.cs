@@ -142,6 +142,7 @@ namespace Snake.NeuralNet
         public double Fitness => _current.Fitness;
         public double BestLastFitness => _neuralNetworks.Last().Fitness;
         public double BestFitness => _bestFitness;
+        public Guid Guid => _runId;
 
         public int MutantCount;
         public int FreshCount;
