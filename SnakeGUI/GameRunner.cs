@@ -76,6 +76,10 @@ namespace SnakeGUI
         private void Timer_Tick(object sender, EventArgs e)
         {
             Run();
+            if (!SnakeForm.Visible && !ResultsForm.Visible)
+            {
+                Application.Exit();
+            }
         }
 
         private void OnApplicationExit(object sender, EventArgs e)
@@ -169,7 +173,7 @@ namespace SnakeGUI
         {
             get
             {
-                return _snakeForm ??= new SnakeGUI(Games);
+                return _snakeForm ??= new SnakeGUI(Games, () => ResultsForm.Show());
             }
             set
             {

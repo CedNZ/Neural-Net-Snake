@@ -40,19 +40,23 @@ namespace SnakeGUI
             this.resultsDataGrid.Location = new System.Drawing.Point(0, 0);
             this.resultsDataGrid.Name = "resultsDataGrid";
             this.resultsDataGrid.RowTemplate.Height = 25;
-            this.resultsDataGrid.Size = new System.Drawing.Size(800, 450);
+            this.resultsDataGrid.Size = new System.Drawing.Size(1000, 450);
             this.resultsDataGrid.TabIndex = 0;
             this.resultsDataGrid.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.resultsDataGrid_CellContentClick);
+            this.resultsDataGrid.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.resultsDataGrid_CellDoubleClick);
             this.resultsDataGrid.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.resultsDataGrid_CellValueChanged);
+            this.resultsDataGrid.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.resultsDataGrid_KeyPress);
             // 
             // ResultsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1000, 450);
             this.Controls.Add(this.resultsDataGrid);
             this.Name = "ResultsForm";
             this.Text = "ResultsForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ResultsForm_FormClosing);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ResultsForm_KeyPress);
             ((System.ComponentModel.ISupportInitialize)(this.resultsDataGrid)).EndInit();
             this.ResumeLayout(false);
 

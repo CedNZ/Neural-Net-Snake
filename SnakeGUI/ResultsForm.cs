@@ -14,6 +14,7 @@ namespace SnakeGUI
     {
         private DataTable _resultsTable;
         private List<GameWrapper> _games;
+        private Timer timer;
 
         public ResultsForm(List<GameWrapper> games)
         {
@@ -52,8 +53,11 @@ namespace SnakeGUI
             resultsDataGrid.Columns.Add(new DataGridCellClasses.HiddenDataGridViewColumn(nameof(Results.Guid)));
 
             resultsDataGrid.DataSource = bindingSource;
+            
+            resultsDataGrid.ClearSelection();
+            resultsDataGrid.CurrentCell = null;
 
-            Timer timer = new Timer();
+            timer = new Timer();
             timer.Interval = 1000;
             timer.Tick += Timer_Tick;
 
@@ -101,11 +105,15 @@ namespace SnakeGUI
 
                 _resultsTable.Rows.Add(row);
             }
+
+            resultsDataGrid.ClearSelection();
+            resultsDataGrid.CurrentCell = null;
         }
 
         private void Results_ListChanged(object sender, ListChangedEventArgs e)
         {
             Refresh();
+            
         }
 
         private void resultsDataGrid_CellValueChanged(object sender, DataGridViewCellEventArgs e)
@@ -124,6 +132,68 @@ namespace SnakeGUI
         private void resultsDataGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             resultsDataGrid.CommitEdit(DataGridViewDataErrorContexts.Commit);
+        }
+
+        private void resultsDataGrid_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            var value = resultsDataGrid.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+
+            switch (resultsDataGrid.Columns[e.ColumnIndex].Name)
+            {
+                case nameof(Results.Name):
+                    _games.Where(g => ((SolidBrush)g.Colour).Color.Name.Equals(value)).Select(g => g.DrawGame = !g.DrawGame).ToList();
+                    break;
+                case nameof(Results.Layers):
+                    _games.Where(g => g.Manager.Layers.Equals(value)).Select(g => g.DrawGame = !g.DrawGame).ToList();
+                    break;
+                case nameof(Results.ActivationFunction):
+                    _games.Where(g => g.Manager.ActivationFunc.Equals(value)).Select(g => g.DrawGame = !g.DrawGame).ToList();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void ResultsForm_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 'p')
+            {
+                if (timer.Enabled)
+                {
+                    timer.Stop();
+                }
+                else
+                {
+                    timer.Start();
+                }
+            }
+            if (e.KeyChar == '+')
+            {
+                timer.Interval *= 2;
+            }
+            if (e.KeyChar == '-')
+            {
+                timer.Interval /= 2;
+            }
+            if (e.KeyChar == '*')
+            {
+                timer.Interval *= 10;
+            }
+            if (e.KeyChar == '/')
+            {
+                timer.Interval /= 10;
+            }
+        }
+
+        private void resultsDataGrid_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            ResultsForm_KeyPress(sender, e);
+        }
+
+        private void ResultsForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Hide();
+            e.Cancel = true;
         }
     }
 

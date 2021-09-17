@@ -23,7 +23,9 @@ namespace SnakeGUI
         private readonly BufferedGraphicsContext context;
         private bool clearBuffer = true;
 
-        public SnakeGUI(List<GameWrapper> games)
+        private Action _showResults;
+
+        public SnakeGUI(List<GameWrapper> games, Action showResults)
         {
             InitializeComponent();
 
@@ -38,6 +40,8 @@ namespace SnakeGUI
             bufferedGraphics = context.Allocate(CreateGraphics(), new Rectangle(0, 0, Width, Height));
 
             DrawToBuffer(bufferedGraphics.Graphics);
+
+            _showResults = showResults;
 
             timer.Start();
             //while (true)
@@ -86,6 +90,18 @@ namespace SnakeGUI
             {
                 clearBuffer = !clearBuffer;
             }
+            if (e.KeyChar == 'r')
+            {
+                _showResults();
+            }    
+        }
+
+        private void SnakeGUI_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            _games.Select(g => g.DrawGame = false).ToList();
+
+            Hide();
+            e.Cancel = true;
         }
     }
 }

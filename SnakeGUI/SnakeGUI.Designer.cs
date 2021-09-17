@@ -37,6 +37,7 @@ namespace SnakeGUI
             this.BackColor = System.Drawing.Color.AliceBlue;
             this.KeyPreview = true;
             this.KeyPress += KeyPress_Handler;
+            this.FormClosing += SnakeGUI_FormClosing;
         }
 
         #endregion
